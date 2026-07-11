@@ -6,5 +6,13 @@ namespace ShittyInpainter
         {
             InitializeComponent();
         }
+
+        private void btnLoad_Click(object sender, EventArgs e)
+        {
+            if (ofd.ShowDialog()  == DialogResult.OK)
+            {
+                pictureBox1.Image = Image.FromFile(ofd.FileName);
+            }
+        }
     }
 }

@@ -34,6 +34,7 @@
             btnInpaint = new Button();
             btnSave = new Button();
             pictureBox1 = new PictureBox();
+            ofd = new OpenFileDialog();
             tableLayoutPanel1.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -85,6 +86,7 @@
             btnLoad.TabIndex = 0;
             btnLoad.Text = "Load";
             btnLoad.UseVisualStyleBackColor = true;
+            btnLoad.Click += btnLoad_Click;
             // 
             // btnInpaint
             // 
@@ -118,6 +120,11 @@
             pictureBox1.TabIndex = 1;
             pictureBox1.TabStop = false;
             // 
+            // ofd
+            // 
+            ofd.FileName = "openFileDialog1";
+            ofd.Filter = "Images|*.png;*.jpg;*.jpeg";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -142,5 +149,6 @@
         private Button btnInpaint;
         private Button btnSave;
         private PictureBox pictureBox1;
+        private OpenFileDialog ofd;
     }
 }
