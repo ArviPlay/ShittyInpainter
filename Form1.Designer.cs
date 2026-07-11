@@ -28,12 +28,119 @@
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
+            tableLayoutPanel1 = new TableLayoutPanel();
+            tableLayoutPanel2 = new TableLayoutPanel();
+            btnLoad = new Button();
+            btnInpaint = new Button();
+            btnSave = new Button();
+            pictureBox1 = new PictureBox();
+            tableLayoutPanel1.SuspendLayout();
+            tableLayoutPanel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            SuspendLayout();
+            // 
+            // tableLayoutPanel1
+            // 
+            tableLayoutPanel1.ColumnCount = 1;
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 20F));
+            tableLayoutPanel1.Controls.Add(tableLayoutPanel2, 0, 0);
+            tableLayoutPanel1.Controls.Add(pictureBox1, 0, 1);
+            tableLayoutPanel1.Dock = DockStyle.Fill;
+            tableLayoutPanel1.Location = new Point(0, 0);
+            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.RowCount = 2;
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 11.7777777F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 88.22222F));
+            tableLayoutPanel1.Size = new Size(734, 511);
+            tableLayoutPanel1.TabIndex = 0;
+            // 
+            // tableLayoutPanel2
+            // 
+            tableLayoutPanel2.ColumnCount = 5;
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tableLayoutPanel2.Controls.Add(btnLoad, 1, 0);
+            tableLayoutPanel2.Controls.Add(btnInpaint, 2, 0);
+            tableLayoutPanel2.Controls.Add(btnSave, 3, 0);
+            tableLayoutPanel2.Dock = DockStyle.Fill;
+            tableLayoutPanel2.Location = new Point(3, 3);
+            tableLayoutPanel2.Name = "tableLayoutPanel2";
+            tableLayoutPanel2.RowCount = 1;
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tableLayoutPanel2.Size = new Size(728, 54);
+            tableLayoutPanel2.TabIndex = 0;
+            // 
+            // btnLoad
+            // 
+            btnLoad.Dock = DockStyle.Fill;
+            btnLoad.Font = new Font("Segoe UI", 14.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btnLoad.Location = new Point(148, 3);
+            btnLoad.Name = "btnLoad";
+            btnLoad.Size = new Size(139, 48);
+            btnLoad.TabIndex = 0;
+            btnLoad.Text = "Load";
+            btnLoad.UseVisualStyleBackColor = true;
+            // 
+            // btnInpaint
+            // 
+            btnInpaint.Dock = DockStyle.Fill;
+            btnInpaint.Font = new Font("Segoe UI", 14.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btnInpaint.Location = new Point(293, 3);
+            btnInpaint.Name = "btnInpaint";
+            btnInpaint.Size = new Size(139, 48);
+            btnInpaint.TabIndex = 1;
+            btnInpaint.Text = "Inpaint";
+            btnInpaint.UseVisualStyleBackColor = true;
+            // 
+            // btnSave
+            // 
+            btnSave.Dock = DockStyle.Fill;
+            btnSave.Font = new Font("Segoe UI", 14.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btnSave.Location = new Point(438, 3);
+            btnSave.Name = "btnSave";
+            btnSave.Size = new Size(139, 48);
+            btnSave.TabIndex = 2;
+            btnSave.Text = "Save";
+            btnSave.UseVisualStyleBackColor = true;
+            // 
+            // pictureBox1
+            // 
+            pictureBox1.Dock = DockStyle.Fill;
+            pictureBox1.Location = new Point(3, 63);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(728, 445);
+            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBox1.TabIndex = 1;
+            pictureBox1.TabStop = false;
+            // 
+            // Form1
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
-            Text = "Form1";
+            ClientSize = new Size(734, 511);
+            Controls.Add(tableLayoutPanel1);
+            MaximizeBox = false;
+            MinimumSize = new Size(750, 550);
+            Name = "Form1";
+            Text = "ShittyInpainter";
+            tableLayoutPanel1.ResumeLayout(false);
+            tableLayoutPanel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            ResumeLayout(false);
         }
 
         #endregion
+
+        private TableLayoutPanel tableLayoutPanel1;
+        private TableLayoutPanel tableLayoutPanel2;
+        private Button btnLoad;
+        private Button btnInpaint;
+        private Button btnSave;
+        private PictureBox pictureBox1;
     }
 }
