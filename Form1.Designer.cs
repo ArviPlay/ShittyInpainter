@@ -35,6 +35,7 @@
             btnSave = new Button();
             pictureBox1 = new PictureBox();
             ofd = new OpenFileDialog();
+            sfd = new SaveFileDialog();
             tableLayoutPanel1.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -109,6 +110,7 @@
             btnSave.TabIndex = 2;
             btnSave.Text = "Save";
             btnSave.UseVisualStyleBackColor = true;
+            btnSave.Click += btnSave_Click;
             // 
             // pictureBox1
             // 
@@ -128,6 +130,11 @@
             // 
             ofd.FileName = "openFileDialog1";
             ofd.Filter = "Images|*.png;*.jpg;*.jpeg";
+            // 
+            // sfd
+            // 
+            sfd.FileName = "image.png";
+            sfd.Filter = "Images|*.png;*.jpg;*.jpeg";
             // 
             // Form1
             // 
@@ -154,5 +161,6 @@
         private Button btnSave;
         private PictureBox pictureBox1;
         private OpenFileDialog ofd;
+        private SaveFileDialog sfd;
     }
 }

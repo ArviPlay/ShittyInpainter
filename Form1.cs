@@ -57,5 +57,17 @@ namespace ShittyInpainter
             isSelecting = false;
             selectionEnd = mousePos;
         }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            if (pictureBox1.Image == null) MessageBox.Show("Select an image", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else
+            {
+                if (sfd.ShowDialog()  == DialogResult.OK)
+                {
+                    pictureBox1.Image.Save(sfd.FileName);
+                }
+            }
+        }
     }
 }
