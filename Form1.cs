@@ -10,6 +10,7 @@ namespace ShittyInpainter
         bool isSelecting = false;
 
         Bitmap image;
+
         public Form1()
         {
             InitializeComponent();
@@ -21,6 +22,10 @@ namespace ShittyInpainter
             {
                 image = new Bitmap(ofd.FileName);
                 pictureBox1.Image = image;
+                selectionStart = new Point(0, 0);
+                selectionEnd = new Point(0, 0);
+                isSelecting = false;
+                pictureBox1.Invalidate();
             }
         }
 
