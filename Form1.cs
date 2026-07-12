@@ -8,6 +8,8 @@ namespace ShittyInpainter
         Point selectionStart = new Point(0, 0);
         Point selectionEnd = new Point(0, 0);
         bool isSelecting = false;
+
+        Bitmap image;
         public Form1()
         {
             InitializeComponent();
@@ -17,7 +19,8 @@ namespace ShittyInpainter
         {
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                pictureBox1.Image = Image.FromFile(ofd.FileName);
+                image = new Bitmap(ofd.FileName);
+                pictureBox1.Image = image;
             }
         }
 
