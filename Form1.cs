@@ -1,5 +1,3 @@
-using static System.ComponentModel.Design.ObjectSelectorEditor;
-
 namespace ShittyInpainter
 {
     public partial class Form1 : Form
@@ -8,6 +6,7 @@ namespace ShittyInpainter
         Point selectionStart = new Point(0, 0);
         Point selectionEnd = new Point(0, 0);
         bool isSelecting = false;
+        bool isMouseInsidePB = false;
 
         Bitmap image;
 
@@ -39,9 +38,12 @@ namespace ShittyInpainter
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
-            using (Brush brush = new SolidBrush(Color.Red))
+            if (isMouseInsidePB)
             {
-                e.Graphics.FillEllipse(brush, mousePos.X - 3, mousePos.Y - 3, 6, 6);
+                using (Brush brush = new SolidBrush(Color.Red))
+                {
+                    e.Graphics.FillEllipse(brush, mousePos.X - 3, mousePos.Y - 3, 6, 6);
+                }
             }
             using (Pen pen = new Pen(Color.DarkRed))
             {
@@ -77,11 +79,22 @@ namespace ShittyInpainter
             if (pictureBox1.Image == null) MessageBox.Show("Select an image", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             else
             {
-                if (sfd.ShowDialog()  == DialogResult.OK)
+                if (sfd.ShowDialog() == DialogResult.OK)
                 {
                     pictureBox1.Image.Save(sfd.FileName);
                 }
             }
+        }
+
+        private void pictureBox1_MouseEnter(object sender, EventArgs e)
+        {
+            isMouseInsidePB = true;
+        }
+
+        private void pictureBox1_MouseLeave(object sender, EventArgs e)
+        {
+            isMouseInsidePB = false;
+            pictureBox1.Invalidate();
         }
     }
 }
