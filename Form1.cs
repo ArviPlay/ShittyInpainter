@@ -125,6 +125,9 @@ namespace ShittyInpainter
         private void imagePanel_Resize(object sender, EventArgs e)
         {
             ResizePictureBoxToFitPanel();
+            selectionStart = new Point(0, 0);
+            selectionEnd = new Point(0, 0);
+            isSelecting = false;
         }
     }
 }
