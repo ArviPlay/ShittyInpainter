@@ -26,6 +26,8 @@ namespace ShittyInpainter
 
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
+            if (image == null) return;
+
             mousePos = e.Location;
             pictureBox1.Invalidate();
         }
@@ -51,12 +53,16 @@ namespace ShittyInpainter
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
+            if (image == null) return;
+
             isSelecting = true;
             selectionStart = mousePos;
         }
 
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
+            if (image == null) return;
+
             isSelecting = false;
             selectionEnd = mousePos;
         }
