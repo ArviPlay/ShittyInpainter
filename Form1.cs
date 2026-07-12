@@ -24,6 +24,7 @@ namespace ShittyInpainter
                 selectionStart = new Point(0, 0);
                 selectionEnd = new Point(0, 0);
                 isSelecting = false;
+                ResizePictureBoxToFitPanel();
                 pictureBox1.Invalidate();
             }
         }
@@ -95,6 +96,35 @@ namespace ShittyInpainter
         {
             isMouseInsidePB = false;
             pictureBox1.Invalidate();
+        }
+
+        private void ResizePictureBoxToFitPanel()
+        {
+            if (image == null) return;
+
+            float panelAspect = imagePanel.Width / (float)imagePanel.Height;
+            float imageAspect = image.Width / (float)image.Height;
+            int newWidth, newHeight;
+
+            if (imageAspect > panelAspect)
+            {
+                newWidth = imagePanel.Width;
+                newHeight = (int)(imagePanel.Width / imageAspect);
+            }
+            else
+            {
+                newHeight = imagePanel.Height;
+                newWidth = (int)(imagePanel.Height * imageAspect);
+            }
+
+            pictureBox1.Size = new Size(newWidth, newHeight);
+            pictureBox1.Left = (imagePanel.Width - newWidth) / 2;
+            pictureBox1.Top = (imagePanel.Height - newHeight) / 2;
+        }
+
+        private void imagePanel_Resize(object sender, EventArgs e)
+        {
+            ResizePictureBoxToFitPanel();
         }
     }
 }

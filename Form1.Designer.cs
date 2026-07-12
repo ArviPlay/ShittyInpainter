@@ -33,11 +33,13 @@
             btnLoad = new Button();
             btnInpaint = new Button();
             btnSave = new Button();
+            imagePanel = new Panel();
             pictureBox1 = new PictureBox();
             ofd = new OpenFileDialog();
             sfd = new SaveFileDialog();
             tableLayoutPanel1.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
+            imagePanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
@@ -47,7 +49,7 @@
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 20F));
             tableLayoutPanel1.Controls.Add(tableLayoutPanel2, 0, 0);
-            tableLayoutPanel1.Controls.Add(pictureBox1, 0, 1);
+            tableLayoutPanel1.Controls.Add(imagePanel, 0, 1);
             tableLayoutPanel1.Dock = DockStyle.Fill;
             tableLayoutPanel1.Location = new Point(0, 0);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -112,14 +114,23 @@
             btnSave.UseVisualStyleBackColor = true;
             btnSave.Click += btnSave_Click;
             // 
+            // imagePanel
+            // 
+            imagePanel.Controls.Add(pictureBox1);
+            imagePanel.Dock = DockStyle.Fill;
+            imagePanel.Location = new Point(3, 63);
+            imagePanel.Name = "imagePanel";
+            imagePanel.Size = new Size(728, 445);
+            imagePanel.TabIndex = 1;
+            imagePanel.Resize += imagePanel_Resize;
+            // 
             // pictureBox1
             // 
-            pictureBox1.Dock = DockStyle.Fill;
-            pictureBox1.Location = new Point(3, 63);
+            pictureBox1.Location = new Point(369, 180);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(728, 445);
-            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
-            pictureBox1.TabIndex = 1;
+            pictureBox1.Size = new Size(100, 50);
+            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
             pictureBox1.Paint += pictureBox1_Paint;
             pictureBox1.MouseDown += pictureBox1_MouseDown;
@@ -150,6 +161,7 @@
             Text = "ShittyInpainter";
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel2.ResumeLayout(false);
+            imagePanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
         }
@@ -161,8 +173,9 @@
         private Button btnLoad;
         private Button btnInpaint;
         private Button btnSave;
-        private PictureBox pictureBox1;
         private OpenFileDialog ofd;
         private SaveFileDialog sfd;
+        private Panel imagePanel;
+        private PictureBox pictureBox1;
     }
 }
