@@ -1,3 +1,5 @@
+using System.Diagnostics.Eventing.Reader;
+
 namespace ShittyInpainter
 {
     public partial class Form1 : Form
@@ -157,8 +159,7 @@ namespace ShittyInpainter
 
             for (int y = rect.Top; y < rect.Bottom; y++) // left to right
             {
-                if (rect.Left <= 0) throw new Exception("Out of range");
-                Color leftColor = img.GetPixel(rect.Left - 1, y);
+                Color leftColor = rect.Left - 1 >= 0 ? img.GetPixel(rect.Left - 1, y) : img.GetPixel(rect.Left, y);
                 for (int x = rect.Left; x < rect.Right; x++)
                 {
                     Color newColor = Color.FromArgb(Math.Clamp((leftColor.R + rnd.Next(0, randomStrength) - randomStrength/2), 0, 255),
@@ -169,8 +170,7 @@ namespace ShittyInpainter
             }
             for (int y = rect.Top; y < rect.Bottom; y++) // right to left
             {
-                if (rect.Right >= img.Width) throw new Exception("Out of range");
-                Color rightColor = img.GetPixel(rect.Right + 1, y);
+                Color rightColor = rect.Right + 1 < img.Width ? img.GetPixel(rect.Right + 1, y) : img.GetPixel(rect.Right, y);
                 for (int x = rect.Right; x > rect.Left; x--)
                 {
                     Color newColor = Color.FromArgb(Math.Clamp((rightColor.R + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
@@ -184,8 +184,7 @@ namespace ShittyInpainter
             }
             for (int x = rect.Left; x < rect.Right; x++) // top to bottom
             {
-                if (rect.Top <= 0) throw new Exception("Out of range");
-                Color topColor = img.GetPixel(x, rect.Top - 1);
+                Color topColor = rect.Top - 1 >= 0 ? img.GetPixel(x, rect.Top - 1) : img.GetPixel(x, rect.Top);
                 for (int y = rect.Top; y < rect.Bottom; y++)
                 {
                     Color newColor = Color.FromArgb(Math.Clamp((topColor.R + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
@@ -199,8 +198,7 @@ namespace ShittyInpainter
             }
             for (int x = rect.Left; x < rect.Right; x++) // bottom to top
             {
-                if (rect.Bottom >= img.Height) throw new Exception("Out of range");
-                Color bottomColor = img.GetPixel(x, rect.Bottom + 1);
+                Color bottomColor = rect.Bottom + 1 < img.Height ? img.GetPixel(x, rect.Bottom + 1) : img.GetPixel(x, rect.Bottom);
                 for (int y = rect.Bottom; y > rect.Top; y--)
                 {
                     Color newColor = Color.FromArgb(Math.Clamp((bottomColor.R + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
