@@ -73,6 +73,11 @@ namespace ShittyInpainter
 
             isSelecting = false;
             selectionEnd = mousePos;
+
+            selectionStart.X = Math.Clamp(selectionStart.X, 0, pictureBox1.Width - 1);
+            selectionStart.Y = Math.Clamp(selectionStart.Y, 0, pictureBox1.Height - 1);
+            selectionEnd.X = Math.Clamp(selectionEnd.X, 0, pictureBox1.Width - 1);
+            selectionEnd.Y = Math.Clamp(selectionEnd.Y, 0, pictureBox1.Height - 1);
         }
 
         private void btnSave_Click(object sender, EventArgs e)
@@ -139,14 +144,15 @@ namespace ShittyInpainter
                 (int)((selectionEnd.Y - selectionStart.Y) * image.Height / (float)pictureBox1.Height)
             );
             Bitmap img = Inpaint(image, scaledRect);
-            pictureBox1.Image = img;
+            Bitmap img2 = Inpaint(img, scaledRect);
+            pictureBox1.Image = img2;
             ResizePictureBoxToFitPanel();
         }
 
         private Bitmap Inpaint(Bitmap img, Rectangle rect)
         {
             Random rnd = new Random();
-            int randomStrength = 100;
+            int randomStrength = 0;
             Bitmap imgCopy = new Bitmap(img);
 
             for (int y = rect.Top; y < rect.Bottom; y++) // left to right
