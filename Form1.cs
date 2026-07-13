@@ -191,6 +191,21 @@ namespace ShittyInpainter
                     imgCopy.SetPixel(x, y, mixedColor);
                 }
             }
+            for (int x = rect.Left; x < rect.Right; x++) // bottom to top
+            {
+                if (rect.Bottom >= img.Height) throw new Exception("Out of range");
+                Color bottomColor = img.GetPixel(x, rect.Bottom + 1);
+                for (int y = rect.Bottom; y > rect.Top; y--)
+                {
+                    Color newColor = Color.FromArgb(Math.Clamp((bottomColor.R + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
+                                                Math.Clamp((bottomColor.G + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
+                                                Math.Clamp((bottomColor.B + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255));
+                    Color mixedColor = Color.FromArgb((imgCopy.GetPixel(x, y).R + newColor.R) / 2,
+                        (imgCopy.GetPixel(x, y).G + newColor.G) / 2,
+                        (imgCopy.GetPixel(x, y).B + newColor.B) / 2);
+                    imgCopy.SetPixel(x, y, mixedColor);
+                }
+            }
 
             return imgCopy;
         }
