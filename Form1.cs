@@ -146,20 +146,37 @@ namespace ShittyInpainter
         private Bitmap Inpaint(Bitmap img, Rectangle rect)
         {
             Random rnd = new Random();
-            int randomStrength = 150;
+            int randomStrength = 100;
             Bitmap imgCopy = new Bitmap(img);
-            for (int y = rect.Top; y < rect.Bottom; y++)
+
+            for (int y = rect.Top; y < rect.Bottom; y++) // left to right
             {
                 if (rect.Left <= 0) throw new Exception("Out of range");
-                Color currentColor = img.GetPixel(rect.Left - 1, y);
+                Color leftColor = img.GetPixel(rect.Left - 1, y);
                 for (int x = rect.Left; x < rect.Right; x++)
                 {
-                    Color newColor = Color.FromArgb(Math.Clamp((currentColor.R + rnd.Next(0, randomStrength) - randomStrength/2), 0, 255),
-                                                Math.Clamp((currentColor.G + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
-                                                Math.Clamp((currentColor.B + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255));
+                    Color newColor = Color.FromArgb(Math.Clamp((leftColor.R + rnd.Next(0, randomStrength) - randomStrength/2), 0, 255),
+                                                Math.Clamp((leftColor.G + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
+                                                Math.Clamp((leftColor.B + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255));
                     imgCopy.SetPixel(x, y, newColor);
                 }
             }
+            for (int y = rect.Top; y < rect.Bottom; y++) // right to left
+            {
+                if (rect.Right >= img.Width) throw new Exception("Out of range");
+                Color rightColor = img.GetPixel(rect.Right + 1, y);
+                for (int x = rect.Right; x > rect.Left; x--)
+                {
+                    Color newColor = Color.FromArgb(Math.Clamp((rightColor.R + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
+                                                Math.Clamp((rightColor.G + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
+                                                Math.Clamp((rightColor.B + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255));
+                    Color mixedColor = Color.FromArgb((imgCopy.GetPixel(x, y).R + newColor.R) / 2,
+                        (imgCopy.GetPixel(x, y).G + newColor.G) / 2,
+                        (imgCopy.GetPixel(x, y).B + newColor.B) / 2);
+                    imgCopy.SetPixel(x, y, mixedColor);
+                }
+            }
+
             return imgCopy;
         }
     }
