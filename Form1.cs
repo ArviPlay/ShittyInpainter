@@ -29,6 +29,7 @@ namespace ShittyInpainter
                 ResizePictureBoxToFitPanel();
                 pictureBox1.Invalidate();
                 pictureBox1.Cursor = Cursors.Cross;
+                tbRandomStrength.Enabled = true;
             }
         }
 
@@ -159,7 +160,7 @@ namespace ShittyInpainter
         private Bitmap Inpaint(Bitmap img, Rectangle rect)
         {
             Random rnd = new Random();
-            int randomStrength = 150;
+            int randomStrength = tbRandomStrength.Value;
             Bitmap imgCopy = new Bitmap(img);
 
             for (int y = rect.Top; y < rect.Bottom; y++) // left to right
@@ -167,7 +168,7 @@ namespace ShittyInpainter
                 Color leftColor = rect.Left - 1 >= 0 ? img.GetPixel(rect.Left - 1, y) : img.GetPixel(rect.Left, y);
                 for (int x = rect.Left; x < rect.Right; x++)
                 {
-                    Color newColor = Color.FromArgb(Math.Clamp((leftColor.R + rnd.Next(0, randomStrength) - randomStrength/2), 0, 255),
+                    Color newColor = Color.FromArgb(Math.Clamp((leftColor.R + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
                                                 Math.Clamp((leftColor.G + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
                                                 Math.Clamp((leftColor.B + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255));
                     imgCopy.SetPixel(x, y, newColor);
@@ -217,6 +218,11 @@ namespace ShittyInpainter
             }
 
             return imgCopy;
+        }
+
+        private void tbRandomStrength_Scroll(object sender, EventArgs e)
+        {
+            lblRandomStrength.Text = $"Random strength: {tbRandomStrength.Value}";
         }
     }
 }
