@@ -145,6 +145,8 @@ namespace ShittyInpainter
 
         private Bitmap Inpaint(Bitmap img, Rectangle rect)
         {
+            Random rnd = new Random();
+            int randomStrength = 150;
             Bitmap imgCopy = new Bitmap(img);
             for (int y = rect.Top; y < rect.Bottom; y++)
             {
@@ -152,7 +154,10 @@ namespace ShittyInpainter
                 Color currentColor = img.GetPixel(rect.Left - 1, y);
                 for (int x = rect.Left; x < rect.Right; x++)
                 {
-                    imgCopy.SetPixel(x, y, currentColor);
+                    Color newColor = Color.FromArgb(Math.Clamp((currentColor.R + rnd.Next(0, randomStrength) - randomStrength/2), 0, 255),
+                                                Math.Clamp((currentColor.G + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
+                                                Math.Clamp((currentColor.B + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255));
+                    imgCopy.SetPixel(x, y, newColor);
                 }
             }
             return imgCopy;
