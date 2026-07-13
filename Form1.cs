@@ -129,5 +129,15 @@ namespace ShittyInpainter
             selectionEnd = new Point(0, 0);
             isSelecting = false;
         }
+
+        private void btnInpaint_Click(object sender, EventArgs e)
+        {
+            Bitmap img = Inpaint(image, new Rectangle(selectionStart.X, selectionStart.Y, selectionEnd.X - selectionStart.X, selectionEnd.Y - selectionStart.Y));
+        }
+
+        private Bitmap Inpaint(Bitmap img, Rectangle rect)
+        {
+            return img;
+        }
     }
 }

@@ -101,6 +101,7 @@
             btnInpaint.TabIndex = 1;
             btnInpaint.Text = "Inpaint";
             btnInpaint.UseVisualStyleBackColor = true;
+            btnInpaint.Click += btnInpaint_Click;
             // 
             // btnSave
             // 
