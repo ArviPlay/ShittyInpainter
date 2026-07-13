@@ -149,7 +149,8 @@ namespace ShittyInpainter
                 (int)((selectionEnd.Y - selectionStart.Y) * image.Height / (float)pictureBox1.Height)
                 );
                 Bitmap img = Inpaint(image, scaledRect);
-                pictureBox1.Image = img;
+                image = img;
+                pictureBox1.Image = image;
                 ResizePictureBoxToFitPanel();
             }
         }
@@ -157,7 +158,7 @@ namespace ShittyInpainter
         private Bitmap Inpaint(Bitmap img, Rectangle rect)
         {
             Random rnd = new Random();
-            int randomStrength = 0;
+            int randomStrength = 150;
             Bitmap imgCopy = new Bitmap(img);
 
             for (int y = rect.Top; y < rect.Bottom; y++) // left to right
