@@ -28,6 +28,7 @@ namespace ShittyInpainter
                 isSelecting = false;
                 ResizePictureBoxToFitPanel();
                 pictureBox1.Invalidate();
+                pictureBox1.Cursor = Cursors.Cross;
             }
         }
 
