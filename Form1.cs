@@ -139,15 +139,19 @@ namespace ShittyInpainter
 
         private void btnInpaint_Click(object sender, EventArgs e)
         {
-            Rectangle scaledRect = new Rectangle(
+            if (image == null) MessageBox.Show("Select an image", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else
+            {
+                Rectangle scaledRect = new Rectangle(
                 (int)(selectionStart.X * image.Width / (float)pictureBox1.Width),
                 (int)(selectionStart.Y * image.Height / (float)pictureBox1.Height),
                 (int)((selectionEnd.X - selectionStart.X) * image.Width / (float)pictureBox1.Width),
                 (int)((selectionEnd.Y - selectionStart.Y) * image.Height / (float)pictureBox1.Height)
-            );
-            Bitmap img = Inpaint(image, scaledRect);
-            pictureBox1.Image = img;
-            ResizePictureBoxToFitPanel();
+                );
+                Bitmap img = Inpaint(image, scaledRect);
+                pictureBox1.Image = img;
+                ResizePictureBoxToFitPanel();
+            }
         }
 
         private Bitmap Inpaint(Bitmap img, Rectangle rect)
