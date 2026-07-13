@@ -146,8 +146,7 @@ namespace ShittyInpainter
                 (int)((selectionEnd.Y - selectionStart.Y) * image.Height / (float)pictureBox1.Height)
             );
             Bitmap img = Inpaint(image, scaledRect);
-            Bitmap img2 = Inpaint(img, scaledRect);
-            pictureBox1.Image = img2;
+            pictureBox1.Image = img;
             ResizePictureBoxToFitPanel();
         }
 
