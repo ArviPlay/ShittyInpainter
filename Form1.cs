@@ -154,9 +154,11 @@ namespace ShittyInpainter
                 btnInpaint.Enabled = false;
                 btnSave.Enabled = false;
                 tbRandomStrength.Enabled = false;
+                int randomStrength = tbRandomStrength.Value;
+                Bitmap imageCopy = new Bitmap(image);
                 Task.Run(() =>
                 {
-                    Bitmap img = Inpaint(image, scaledRect);
+                    Bitmap img = Inpaint(imageCopy, scaledRect, randomStrength);
                     image = img;
                     this.Invoke((Action)(() =>
                     {
@@ -171,10 +173,9 @@ namespace ShittyInpainter
             }
         }
 
-        private Bitmap Inpaint(Bitmap img, Rectangle rect)
+        private Bitmap Inpaint(Bitmap img, Rectangle rect, int randomStrength)
         {
             Random rnd = new Random();
-            int randomStrength = tbRandomStrength.Value;
             Bitmap imgCopy = new Bitmap(img);
 
             for (int y = rect.Top; y < rect.Bottom; y++) // left to right
