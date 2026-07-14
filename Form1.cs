@@ -1,5 +1,3 @@
-using System.Diagnostics.Eventing.Reader;
-
 namespace ShittyInpainter
 {
     public partial class Form1 : Form
