@@ -30,6 +30,7 @@ namespace ShittyInpainter
                 pictureBox1.Invalidate();
                 pictureBox1.Cursor = Cursors.Cross;
                 tbRandomStrength.Enabled = true;
+                this.Text = $"ShittyInpainter - loaded: {ofd.FileName}";
             }
         }
 
@@ -92,6 +93,7 @@ namespace ShittyInpainter
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
                     pictureBox1.Image.Save(sfd.FileName);
+                    this.Text = $"ShittyInpainter - saved: {sfd.FileName}";
                 }
             }
         }
@@ -157,6 +159,7 @@ namespace ShittyInpainter
                 tbRandomStrength.Enabled = false;
                 int randomStrength = tbRandomStrength.Value;
                 Bitmap imageCopy = new Bitmap(image);
+                this.Text = "ShittyInpainter - working...";
                 Task.Run(() =>
                 {
                     Bitmap img = Inpaint(imageCopy, scaledRect, randomStrength);
@@ -172,6 +175,7 @@ namespace ShittyInpainter
                         btnInpaint.Enabled = true;
                         btnSave.Enabled = true;
                         tbRandomStrength.Enabled = true;
+                        this.Text = "ShittyInpainter - completed";
                     }));
                 });
             }
