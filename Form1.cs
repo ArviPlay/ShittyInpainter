@@ -150,6 +150,7 @@ namespace ShittyInpainter
                 (int)((selectionEnd.X - selectionStart.X) * image.Width / (float)pictureBox1.Width),
                 (int)((selectionEnd.Y - selectionStart.Y) * image.Height / (float)pictureBox1.Height)
                 );
+                if (scaledRect.Width <= 0 || scaledRect.Height <= 0) return;
                 btnLoad.Enabled = false;
                 btnInpaint.Enabled = false;
                 btnSave.Enabled = false;
@@ -159,7 +160,10 @@ namespace ShittyInpainter
                 Task.Run(() =>
                 {
                     Bitmap img = Inpaint(imageCopy, scaledRect, randomStrength);
+                    Bitmap oldImage = image;
                     image = img;
+                    oldImage?.Dispose();
+                    imageCopy?.Dispose();
                     this.Invoke((Action)(() =>
                     {
                         pictureBox1.Image = image;
@@ -177,7 +181,7 @@ namespace ShittyInpainter
         {
             Random rnd = new Random();
             Bitmap imgCopy = new Bitmap(img);
-
+            if (rect.Width <= 0 || rect.Height <= 0) return imgCopy;
             for (int y = rect.Top; y < rect.Bottom; y++) // left to right
             {
                 Color leftColor = rect.Left - 1 >= 0 ? img.GetPixel(rect.Left - 1, y) : img.GetPixel(rect.Left, y);
