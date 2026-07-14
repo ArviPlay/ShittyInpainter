@@ -150,6 +150,10 @@ namespace ShittyInpainter
                 (int)((selectionEnd.X - selectionStart.X) * image.Width / (float)pictureBox1.Width),
                 (int)((selectionEnd.Y - selectionStart.Y) * image.Height / (float)pictureBox1.Height)
                 );
+                btnLoad.Enabled = false;
+                btnInpaint.Enabled = false;
+                btnSave.Enabled = false;
+                tbRandomStrength.Enabled = false;
                 Task.Run(() =>
                 {
                     Bitmap img = Inpaint(image, scaledRect);
@@ -158,6 +162,10 @@ namespace ShittyInpainter
                     {
                         pictureBox1.Image = image;
                         ResizePictureBoxToFitPanel();
+                        btnLoad.Enabled = true;
+                        btnInpaint.Enabled = true;
+                        btnSave.Enabled = true;
+                        tbRandomStrength.Enabled = true;
                     }));
                 });
             }
