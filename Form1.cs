@@ -150,10 +150,16 @@ namespace ShittyInpainter
                 (int)((selectionEnd.X - selectionStart.X) * image.Width / (float)pictureBox1.Width),
                 (int)((selectionEnd.Y - selectionStart.Y) * image.Height / (float)pictureBox1.Height)
                 );
-                Bitmap img = Inpaint(image, scaledRect);
-                image = img;
-                pictureBox1.Image = image;
-                ResizePictureBoxToFitPanel();
+                Task.Run(() =>
+                {
+                    Bitmap img = Inpaint(image, scaledRect);
+                    image = img;
+                    this.Invoke((Action)(() =>
+                    {
+                        pictureBox1.Image = image;
+                        ResizePictureBoxToFitPanel();
+                    }));
+                });
             }
         }
 
