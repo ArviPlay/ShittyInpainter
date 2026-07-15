@@ -17,18 +17,26 @@ namespace ShittyInpainter
 
         private void btnLoad_Click(object sender, EventArgs e)
         {
-            if (ofd.ShowDialog() == DialogResult.OK)
+            try
             {
-                image = new Bitmap(ofd.FileName);
-                pictureBox1.Image = image;
-                selectionStart = new Point(0, 0);
-                selectionEnd = new Point(0, 0);
-                isSelecting = false;
-                ResizePictureBoxToFitPanel();
-                pictureBox1.Invalidate();
-                pictureBox1.Cursor = Cursors.Cross;
-                tbRandomStrength.Enabled = true;
-                this.Text = $"ShittyInpainter - loaded: {ofd.FileName}";
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    image = new Bitmap(ofd.FileName);
+                    pictureBox1.Image = image;
+                    selectionStart = new Point(0, 0);
+                    selectionEnd = new Point(0, 0);
+                    isSelecting = false;
+                    ResizePictureBoxToFitPanel();
+                    pictureBox1.Invalidate();
+                    pictureBox1.Cursor = Cursors.Cross;
+                    tbRandomStrength.Enabled = true;
+                    this.Text = $"ShittyInpainter - loaded: {ofd.FileName}";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Text = $"ShittyInpainter - loading error";
             }
         }
 
@@ -189,7 +197,7 @@ namespace ShittyInpainter
                                 btnInpaint.Enabled = true;
                                 btnSave.Enabled = true;
                                 tbRandomStrength.Enabled = true;
-                                this.Text = "ShittyInpainter - error";
+                                this.Text = "ShittyInpainter - inpainting error";
                             })));
                         }
                     });
