@@ -202,10 +202,12 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(734, 511);
             Controls.Add(tableLayoutPanel1);
+            KeyPreview = true;
             MaximizeBox = false;
             MinimumSize = new Size(750, 550);
             Name = "Form1";
             Text = "ShittyInpainter";
+            KeyDown += Form1_KeyDown;
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel2.ResumeLayout(false);
             imagePanel.ResumeLayout(false);

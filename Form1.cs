@@ -9,6 +9,7 @@ namespace ShittyInpainter
         bool isMouseInsidePB = false;
 
         Bitmap image;
+        Bitmap previousImage;
 
         public Form1()
         {
@@ -21,6 +22,7 @@ namespace ShittyInpainter
             {
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
+                    if (image != null) previousImage = new Bitmap(image);
                     image = new Bitmap(ofd.FileName);
                     pictureBox1.Image = image;
                     selectionStart = new Point(0, 0);
@@ -175,6 +177,7 @@ namespace ShittyInpainter
                     tbRandomStrength.Enabled = false;
                     int randomStrength = tbRandomStrength.Value;
                     Bitmap imageCopy = new Bitmap(image);
+                    previousImage = new Bitmap(image);
                     this.Text = "ShittyInpainter - working...";
                     Task.Run(() =>
                     {
@@ -266,7 +269,7 @@ namespace ShittyInpainter
                         }));
                     }
                 }
-                
+
             }
             for (int x = rect.Left; x < rect.Right; x++) // top to bottom
             {
@@ -289,7 +292,7 @@ namespace ShittyInpainter
                         }));
                     }
                 }
-                
+
             }
             for (int x = rect.Left; x < rect.Right; x++) // bottom to top
             {
@@ -320,6 +323,22 @@ namespace ShittyInpainter
         private void tbRandomStrength_Scroll(object sender, EventArgs e)
         {
             lblRandomStrength.Text = $"Random strength: {tbRandomStrength.Value}";
+        }
+
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.Z)
+            {
+                e.SuppressKeyPress = true;
+                if (previousImage != null)
+                {
+                    image = new Bitmap(previousImage);
+                    previousImage = null;
+                    pictureBox1.Image = image;
+                    pictureBox1.Invalidate();
+                    this.Text = $"ShittyInpainter - undo";
+                }
+            }
         }
     }
 }
