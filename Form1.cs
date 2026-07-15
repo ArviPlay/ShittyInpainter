@@ -141,41 +141,63 @@ namespace ShittyInpainter
 
         private void btnInpaint_Click(object sender, EventArgs e)
         {
-            if (image == null) MessageBox.Show("Select an image", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            else
+            try
             {
-                Rectangle scaledRect = new Rectangle(
-                (int)(selectionStart.X * image.Width / (float)pictureBox1.Width),
-                (int)(selectionStart.Y * image.Height / (float)pictureBox1.Height),
-                (int)((selectionEnd.X - selectionStart.X) * image.Width / (float)pictureBox1.Width),
-                (int)((selectionEnd.Y - selectionStart.Y) * image.Height / (float)pictureBox1.Height)
-                );
-                if (scaledRect.Width <= 0 || scaledRect.Height <= 0) return;
-                btnLoad.Enabled = false;
-                btnInpaint.Enabled = false;
-                btnSave.Enabled = false;
-                tbRandomStrength.Enabled = false;
-                int randomStrength = tbRandomStrength.Value;
-                Bitmap imageCopy = new Bitmap(image);
-                this.Text = "ShittyInpainter - working...";
-                Task.Run(() =>
+                if (image == null) MessageBox.Show("Select an image", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                else
                 {
-                    Bitmap img = Inpaint(imageCopy, scaledRect, randomStrength);
-                    Bitmap oldImage = image;
-                    image = img;
-                    oldImage?.Dispose();
-                    imageCopy?.Dispose();
-                    this.Invoke((Action)(() =>
+                    Rectangle scaledRect = new Rectangle(
+                    (int)(selectionStart.X * image.Width / (float)pictureBox1.Width),
+                    (int)(selectionStart.Y * image.Height / (float)pictureBox1.Height),
+                    (int)((selectionEnd.X - selectionStart.X) * image.Width / (float)pictureBox1.Width),
+                    (int)((selectionEnd.Y - selectionStart.Y) * image.Height / (float)pictureBox1.Height)
+                    );
+                    if (scaledRect.Width <= 0 || scaledRect.Height <= 0) return;
+                    btnLoad.Enabled = false;
+                    btnInpaint.Enabled = false;
+                    btnSave.Enabled = false;
+                    tbRandomStrength.Enabled = false;
+                    int randomStrength = tbRandomStrength.Value;
+                    Bitmap imageCopy = new Bitmap(image);
+                    this.Text = "ShittyInpainter - working...";
+                    Task.Run(() =>
                     {
-                        pictureBox1.Image = image;
-                        ResizePictureBoxToFitPanel();
-                        btnLoad.Enabled = true;
-                        btnInpaint.Enabled = true;
-                        btnSave.Enabled = true;
-                        tbRandomStrength.Enabled = true;
-                        this.Text = "ShittyInpainter - completed";
-                    }));
-                });
+                        try
+                        {
+                            Bitmap img = Inpaint(imageCopy, scaledRect, randomStrength);
+                            Bitmap oldImage = image;
+                            image = img;
+                            oldImage?.Dispose();
+                            imageCopy?.Dispose();
+                            this.Invoke((Action)(() =>
+                            {
+                                pictureBox1.Image = image;
+                                ResizePictureBoxToFitPanel();
+                                btnLoad.Enabled = true;
+                                btnInpaint.Enabled = true;
+                                btnSave.Enabled = true;
+                                tbRandomStrength.Enabled = true;
+                                this.Text = "ShittyInpainter - completed";
+                            }));
+                        }
+                        catch (Exception ex)
+                        {
+                            this.Invoke((Action)((() =>
+                            {
+                                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                btnLoad.Enabled = true;
+                                btnInpaint.Enabled = true;
+                                btnSave.Enabled = true;
+                                tbRandomStrength.Enabled = true;
+                                this.Text = "ShittyInpainter - error";
+                            })));
+                        }
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
