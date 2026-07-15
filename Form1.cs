@@ -221,6 +221,10 @@ namespace ShittyInpainter
         {
             Random rnd = new Random();
             Bitmap imgCopy = new Bitmap(img);
+
+            int totalPixels = rect.Width * rect.Height * 4;
+            int processedPixels = 0;
+
             if (rect.Width <= 0 || rect.Height <= 0) return imgCopy;
             for (int y = rect.Top; y < rect.Bottom; y++) // left to right
             {
@@ -231,6 +235,14 @@ namespace ShittyInpainter
                                                 Math.Clamp((leftColor.G + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
                                                 Math.Clamp((leftColor.B + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255));
                     imgCopy.SetPixel(x, y, newColor);
+                    processedPixels++;
+                    if (processedPixels % 50000 == 0)
+                    {
+                        this.BeginInvoke((Action)(() =>
+                        {
+                            this.Text = $"ShittyInpainter - working: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
+                        }));
+                    }
                 }
             }
             for (int y = rect.Top; y < rect.Bottom; y++) // right to left
@@ -245,7 +257,16 @@ namespace ShittyInpainter
                         (imgCopy.GetPixel(x, y).G + newColor.G) / 2,
                         (imgCopy.GetPixel(x, y).B + newColor.B) / 2);
                     imgCopy.SetPixel(x, y, mixedColor);
+                    processedPixels++;
+                    if (processedPixels % 50000 == 0)
+                    {
+                        this.BeginInvoke((Action)(() =>
+                        {
+                            this.Text = $"ShittyInpainter - working: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
+                        }));
+                    }
                 }
+                
             }
             for (int x = rect.Left; x < rect.Right; x++) // top to bottom
             {
@@ -259,7 +280,16 @@ namespace ShittyInpainter
                         (imgCopy.GetPixel(x, y).G + newColor.G) / 2,
                         (imgCopy.GetPixel(x, y).B + newColor.B) / 2);
                     imgCopy.SetPixel(x, y, mixedColor);
+                    processedPixels++;
+                    if (processedPixels % 50000 == 0)
+                    {
+                        this.BeginInvoke((Action)(() =>
+                        {
+                            this.Text = $"ShittyInpainter - working: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
+                        }));
+                    }
                 }
+                
             }
             for (int x = rect.Left; x < rect.Right; x++) // bottom to top
             {
@@ -273,6 +303,14 @@ namespace ShittyInpainter
                         (imgCopy.GetPixel(x, y).G + newColor.G) / 2,
                         (imgCopy.GetPixel(x, y).B + newColor.B) / 2);
                     imgCopy.SetPixel(x, y, mixedColor);
+                    processedPixels++;
+                    if (processedPixels % 50000 == 0)
+                    {
+                        this.BeginInvoke((Action)(() =>
+                        {
+                            this.Text = $"ShittyInpainter - working: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
+                        }));
+                    }
                 }
             }
 
