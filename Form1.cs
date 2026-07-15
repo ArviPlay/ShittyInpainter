@@ -93,14 +93,22 @@ namespace ShittyInpainter
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            if (pictureBox1.Image == null) MessageBox.Show("Select an image", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            else
+            try
             {
-                if (sfd.ShowDialog() == DialogResult.OK)
+                if (pictureBox1.Image == null) MessageBox.Show("Select an image", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                else
                 {
-                    pictureBox1.Image.Save(sfd.FileName);
-                    this.Text = $"ShittyInpainter - saved: {sfd.FileName}";
+                    if (sfd.ShowDialog() == DialogResult.OK)
+                    {
+                        pictureBox1.Image.Save(sfd.FileName);
+                        this.Text = $"ShittyInpainter - saved: {sfd.FileName}";
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Text = $"ShittyInpainter - saving error";
             }
         }
 
