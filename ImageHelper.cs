@@ -28,6 +28,8 @@
                     bmp.SetPixel(x, y, arr[x, y]);
                 }
             }
+
+            return bmp;
         }
     }
 }
