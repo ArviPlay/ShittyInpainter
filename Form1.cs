@@ -177,6 +177,7 @@ namespace ShittyInpainter
                     tbRandomStrength.Enabled = false;
                     int randomStrength = tbRandomStrength.Value;
                     Bitmap imageCopy = new Bitmap(image);
+                    previousImage?.Dispose();
                     previousImage = new Bitmap(image);
                     this.Text = "ShittyInpainter - working...";
                     Task.Run(() =>
@@ -186,11 +187,12 @@ namespace ShittyInpainter
                             Bitmap img = Inpaint(imageCopy, scaledRect, randomStrength);
                             Bitmap oldImage = image;
                             image = img;
-                            oldImage?.Dispose();
+                            
                             imageCopy?.Dispose();
                             this.Invoke((Action)(() =>
                             {
                                 pictureBox1.Image = image;
+                                oldImage?.Dispose();
                                 ResizePictureBoxToFitPanel();
                                 btnLoad.Enabled = true;
                                 btnInpaint.Enabled = true;
@@ -223,101 +225,113 @@ namespace ShittyInpainter
         private Bitmap Inpaint(Bitmap img, Rectangle rect, int randomStrength)
         {
             Random rnd = new Random();
-            Bitmap imgCopy = new Bitmap(img);
+
+            this.BeginInvoke((Action)(() =>
+            {
+                this.Text = $"ShittyInpainter - converting to array";
+            }));
+            Color[,] imgArr = ImageHelper.BitmapToArray(img);
 
             int totalPixels = rect.Width * rect.Height * 4;
             int processedPixels = 0;
 
-            if (rect.Width <= 0 || rect.Height <= 0) return imgCopy;
+            if (rect.Width <= 0 || rect.Height <= 0) return img;
             for (int y = rect.Top; y < rect.Bottom; y++) // left to right
             {
-                Color leftColor = rect.Left - 1 >= 0 ? img.GetPixel(rect.Left - 1, y) : img.GetPixel(rect.Left, y);
+                Color leftColor = rect.Left - 1 >= 0 ? imgArr[rect.Left - 1, y] : imgArr[rect.Left, y];
                 for (int x = rect.Left; x < rect.Right; x++)
                 {
                     Color newColor = Color.FromArgb(Math.Clamp((leftColor.R + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
                                                 Math.Clamp((leftColor.G + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
                                                 Math.Clamp((leftColor.B + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255));
-                    imgCopy.SetPixel(x, y, newColor);
+                    imgArr[x, y] = newColor;
                     processedPixels++;
                     if (processedPixels % 50000 == 0)
                     {
                         this.BeginInvoke((Action)(() =>
                         {
-                            this.Text = $"ShittyInpainter - working: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
+                            this.Text = $"ShittyInpainter - inpainting: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
                         }));
                     }
                 }
             }
             for (int y = rect.Top; y < rect.Bottom; y++) // right to left
             {
-                Color rightColor = rect.Right + 1 < img.Width ? img.GetPixel(rect.Right + 1, y) : img.GetPixel(rect.Right, y);
+                Color rightColor = rect.Right + 1 < imgArr.GetLength(0) ? imgArr[rect.Right + 1, y] : imgArr[rect.Right, y];
                 for (int x = rect.Right; x > rect.Left; x--)
                 {
                     Color newColor = Color.FromArgb(Math.Clamp((rightColor.R + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
                                                 Math.Clamp((rightColor.G + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
                                                 Math.Clamp((rightColor.B + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255));
-                    Color mixedColor = Color.FromArgb((imgCopy.GetPixel(x, y).R + newColor.R) / 2,
-                        (imgCopy.GetPixel(x, y).G + newColor.G) / 2,
-                        (imgCopy.GetPixel(x, y).B + newColor.B) / 2);
-                    imgCopy.SetPixel(x, y, mixedColor);
+                    Color mixedColor = Color.FromArgb((imgArr[x, y].R + newColor.R) / 2,
+                        (imgArr[x, y].G + newColor.G) / 2,
+                        (imgArr[x, y].B + newColor.B) / 2);
+                    imgArr[x, y] = mixedColor;
                     processedPixels++;
                     if (processedPixels % 50000 == 0)
                     {
                         this.BeginInvoke((Action)(() =>
                         {
-                            this.Text = $"ShittyInpainter - working: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
+                            this.Text = $"ShittyInpainter - inpainting: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
                         }));
                     }
                 }
-
             }
             for (int x = rect.Left; x < rect.Right; x++) // top to bottom
             {
-                Color topColor = rect.Top - 1 >= 0 ? img.GetPixel(x, rect.Top - 1) : img.GetPixel(x, rect.Top);
+                Color topColor = rect.Top - 1 >= 0 ? imgArr[x, rect.Top - 1] : imgArr[x, rect.Top];
                 for (int y = rect.Top; y < rect.Bottom; y++)
                 {
                     Color newColor = Color.FromArgb(Math.Clamp((topColor.R + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
                                                 Math.Clamp((topColor.G + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
                                                 Math.Clamp((topColor.B + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255));
-                    Color mixedColor = Color.FromArgb((imgCopy.GetPixel(x, y).R + newColor.R) / 2,
-                        (imgCopy.GetPixel(x, y).G + newColor.G) / 2,
-                        (imgCopy.GetPixel(x, y).B + newColor.B) / 2);
-                    imgCopy.SetPixel(x, y, mixedColor);
+                    Color mixedColor = Color.FromArgb((imgArr[x, y].R + newColor.R) / 2,
+                        (imgArr[x, y].G + newColor.G) / 2,
+                        (imgArr[x, y].B + newColor.B) / 2);
+                    imgArr[x, y] = mixedColor;
                     processedPixels++;
                     if (processedPixels % 50000 == 0)
                     {
                         this.BeginInvoke((Action)(() =>
                         {
-                            this.Text = $"ShittyInpainter - working: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
+                            this.Text = $"ShittyInpainter - inpainting: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
                         }));
                     }
                 }
-
             }
             for (int x = rect.Left; x < rect.Right; x++) // bottom to top
             {
-                Color bottomColor = rect.Bottom + 1 < img.Height ? img.GetPixel(x, rect.Bottom + 1) : img.GetPixel(x, rect.Bottom);
+                Color bottomColor = rect.Bottom + 1 < imgArr.GetLength(1) ? imgArr[x, rect.Bottom + 1] : imgArr[x, rect.Bottom];
                 for (int y = rect.Bottom; y > rect.Top; y--)
                 {
                     Color newColor = Color.FromArgb(Math.Clamp((bottomColor.R + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
                                                 Math.Clamp((bottomColor.G + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
                                                 Math.Clamp((bottomColor.B + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255));
-                    Color mixedColor = Color.FromArgb((imgCopy.GetPixel(x, y).R + newColor.R) / 2,
-                        (imgCopy.GetPixel(x, y).G + newColor.G) / 2,
-                        (imgCopy.GetPixel(x, y).B + newColor.B) / 2);
-                    imgCopy.SetPixel(x, y, mixedColor);
+                    Color mixedColor = Color.FromArgb((imgArr[x, y].R + newColor.R) / 2,
+                        (imgArr[x, y].G + newColor.G) / 2,
+                        (imgArr[x, y].B + newColor.B) / 2);
+                    imgArr[x, y] = mixedColor;
                     processedPixels++;
                     if (processedPixels % 50000 == 0)
                     {
                         this.BeginInvoke((Action)(() =>
                         {
-                            this.Text = $"ShittyInpainter - working: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
+                            this.Text = $"ShittyInpainter - inpainting: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
                         }));
                     }
                 }
             }
+            this.BeginInvoke((Action)(() =>
+            {
+                this.Text = $"ShittyInpainter - converting to image";
+            }));
+            Bitmap newImg = ImageHelper.ArrayToBitmap(imgArr);
+            img = null;
+            imgArr = null;
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
 
-            return imgCopy;
+            return newImg;
         }
 
         private void tbRandomStrength_Scroll(object sender, EventArgs e)
