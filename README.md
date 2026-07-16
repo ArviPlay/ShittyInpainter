@@ -18,5 +18,8 @@ a simple experimental image inpainting tool with a custom random algorithm built
 - Save - save the modified image
 - Slider - controls how much randomness is added to the filling
 
+## hotkeys
+Ctrl+Z - undo last change
+
 ## algorithm
 the program fills the selected area by taking colors from the edges of the selection and spreading them inward with random variations
