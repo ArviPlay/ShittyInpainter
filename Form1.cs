@@ -177,6 +177,7 @@ namespace ShittyInpainter
                     tbRandomStrength.Enabled = false;
                     int randomStrength = tbRandomStrength.Value;
                     Bitmap imageCopy = new Bitmap(image);
+                    previousImage?.Dispose();
                     previousImage = new Bitmap(image);
                     this.Text = "ShittyInpainter - working...";
                     Task.Run(() =>
@@ -186,11 +187,12 @@ namespace ShittyInpainter
                             Bitmap img = Inpaint(imageCopy, scaledRect, randomStrength);
                             Bitmap oldImage = image;
                             image = img;
-                            oldImage?.Dispose();
+                            
                             imageCopy?.Dispose();
                             this.Invoke((Action)(() =>
                             {
                                 pictureBox1.Image = image;
+                                oldImage?.Dispose();
                                 ResizePictureBoxToFitPanel();
                                 btnLoad.Enabled = true;
                                 btnInpaint.Enabled = true;
@@ -324,6 +326,10 @@ namespace ShittyInpainter
                 this.Text = $"ShittyInpainter - converting to image";
             }));
             Bitmap newImg = ImageHelper.ArrayToBitmap(imgArr);
+            img = null;
+            imgArr = null;
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
 
             return newImg;
         }
