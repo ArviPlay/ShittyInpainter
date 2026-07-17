@@ -6,6 +6,7 @@ namespace ShittyInpainter
         Point selectionStart = new Point(0, 0);
         Point selectionEnd = new Point(0, 0);
         bool isSelecting = false;
+        bool isEditingSelection = false;
         bool isMouseInsidePB = false;
 
         Bitmap image;
@@ -48,10 +49,49 @@ namespace ShittyInpainter
 
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
-            if (image == null) return;
-
             mousePos = e.Location;
             pictureBox1.Invalidate();
+            
+            if (e.Button == MouseButtons.Right)
+            {
+                if (selectionStart == selectionEnd) return;
+                if (isEditingSelection)
+                {
+                    Point upperLeft = selectionStart;
+                    Point upperRight = new Point(selectionEnd.X, selectionStart.Y);
+                    Point lowerLeft = new Point(selectionStart.X, selectionEnd.Y);
+                    Point lowerRight = selectionEnd;
+                    double ulDist = Math.Sqrt(Math.Pow(mousePos.X - upperLeft.X, 2) + Math.Pow(mousePos.Y - upperLeft.Y, 2));
+                    double urDist = Math.Sqrt(Math.Pow(mousePos.X - upperRight.X, 2) + Math.Pow(mousePos.Y - upperRight.Y, 2));
+                    double llDist = Math.Sqrt(Math.Pow(mousePos.X - lowerLeft.X, 2) + Math.Pow(mousePos.Y - lowerLeft.Y, 2));
+                    double lrDist = Math.Sqrt(Math.Pow(mousePos.X - lowerRight.X, 2) + Math.Pow(mousePos.Y - lowerRight.Y, 2));
+                    string minDistName = "ul";
+                    double minDist = ulDist;
+                    if (urDist < ulDist) { minDistName = "ur"; minDist = urDist; }
+                    if (llDist < minDist) { minDistName = "ll"; minDist = llDist; }
+                    if (lrDist < minDist) { minDistName = "lr"; minDist = lrDist; }
+                    if (minDist <= 20)
+                    {
+                        switch (minDistName)
+                        {
+                            case "ul":
+                                selectionStart = mousePos;
+                                break;
+                            case "ur":
+                                selectionStart.Y = mousePos.Y;
+                                selectionEnd.X = mousePos.X;
+                                break;
+                            case "ll":
+                                selectionStart.X = mousePos.X;
+                                selectionEnd.Y = mousePos.Y;
+                                break;
+                            case "lr":
+                                selectionEnd = mousePos;
+                                break;
+                        }
+                    }
+                }
+            }
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
@@ -67,7 +107,7 @@ namespace ShittyInpainter
             {
                 if (isSelecting)
                 {
-                    e.Graphics.DrawRectangle(pen, selectionStart.X, selectionStart.Y, mousePos.X - selectionStart.X, mousePos.Y - selectionStart.Y);
+                    e.Graphics.DrawRectangle(pen, Math.Min(selectionStart.X, mousePos.X), Math.Min(selectionStart.Y, mousePos.Y), Math.Abs(mousePos.X - selectionStart.X), Math.Abs(mousePos.Y - selectionStart.Y));
                 }
                 else
                 {
@@ -80,21 +120,45 @@ namespace ShittyInpainter
         {
             if (image == null) return;
 
-            isSelecting = true;
-            selectionStart = mousePos;
+            if (e.Button == MouseButtons.Left)
+            {
+                isSelecting = true;
+                selectionStart = mousePos;
+            }
+            else if (e.Button == MouseButtons.Right)
+            {
+                if (selectionStart == selectionEnd) return;
+                else
+                {
+                    isEditingSelection = true;
+                }
+            }
         }
 
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
             if (image == null) return;
+            if (e.Button == MouseButtons.Left)
+            {
+                isSelecting = false;
 
-            isSelecting = false;
-            selectionEnd = mousePos;
+                int left = Math.Min(selectionStart.X, mousePos.X);
+                int top = Math.Min(selectionStart.Y, mousePos.Y);
+                int right = Math.Max(selectionStart.X, mousePos.X);
+                int bottom = Math.Max(selectionStart.Y, mousePos.Y);
 
+                selectionStart = new Point(left, top);
+                selectionEnd = new Point(right, bottom);
+            }
+            if (e.Button == MouseButtons.Right)
+            {
+                isEditingSelection = false;
+            }
             selectionStart.X = Math.Clamp(selectionStart.X, 0, pictureBox1.Width - 1);
             selectionStart.Y = Math.Clamp(selectionStart.Y, 0, pictureBox1.Height - 1);
             selectionEnd.X = Math.Clamp(selectionEnd.X, 0, pictureBox1.Width - 1);
             selectionEnd.Y = Math.Clamp(selectionEnd.Y, 0, pictureBox1.Height - 1);
+            pictureBox1.Invalidate();
         }
 
         private void btnSave_Click(object sender, EventArgs e)
