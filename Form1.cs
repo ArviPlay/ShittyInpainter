@@ -18,6 +18,10 @@ namespace ShittyInpainter
 
         private void btnLoad_Click(object sender, EventArgs e)
         {
+            LoadImage();
+        }
+        private void LoadImage()
+        {
             try
             {
                 if (ofd.ShowDialog() == DialogResult.OK)
@@ -352,6 +356,11 @@ namespace ShittyInpainter
                     pictureBox1.Invalidate();
                     this.Text = $"ShittyInpainter - undo";
                 }
+            }
+            else if (e.Control && e.KeyCode == Keys.O)
+            {
+                e.SuppressKeyPress= true;
+                LoadImage();
             }
         }
     }
