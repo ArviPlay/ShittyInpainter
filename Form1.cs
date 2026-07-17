@@ -70,7 +70,7 @@ namespace ShittyInpainter
                     if (urDist < ulDist) { minDistName = "ur"; minDist = urDist; }
                     if (llDist < minDist) { minDistName = "ll"; minDist = llDist; }
                     if (lrDist < minDist) { minDistName = "lr"; minDist = lrDist; }
-                    if (minDist <= 30)
+                    if (minDist <= 20)
                     {
                         switch (minDistName)
                         {
@@ -154,6 +154,11 @@ namespace ShittyInpainter
             {
                 isEditingSelection = false;
             }
+            selectionStart.X = Math.Clamp(selectionStart.X, 0, pictureBox1.Width - 1);
+            selectionStart.Y = Math.Clamp(selectionStart.Y, 0, pictureBox1.Height - 1);
+            selectionEnd.X = Math.Clamp(selectionEnd.X, 0, pictureBox1.Width - 1);
+            selectionEnd.Y = Math.Clamp(selectionEnd.Y, 0, pictureBox1.Height - 1);
+            pictureBox1.Invalidate();
         }
 
         private void btnSave_Click(object sender, EventArgs e)
