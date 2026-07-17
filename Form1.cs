@@ -99,6 +99,10 @@ namespace ShittyInpainter
 
         private void btnSave_Click(object sender, EventArgs e)
         {
+            SaveImage();
+        }
+        private void SaveImage()
+        {
             try
             {
                 if (pictureBox1.Image == null) MessageBox.Show("Select an image", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -359,8 +363,13 @@ namespace ShittyInpainter
             }
             else if (e.Control && e.KeyCode == Keys.O)
             {
-                e.SuppressKeyPress= true;
+                e.SuppressKeyPress = true;
                 LoadImage();
+            }
+            else if (e.Control && e.KeyCode == Keys.S)
+            {
+                e.SuppressKeyPress = true;
+                SaveImage();
             }
         }
     }
