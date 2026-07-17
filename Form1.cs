@@ -67,7 +67,7 @@ namespace ShittyInpainter
             {
                 if (isSelecting)
                 {
-                    e.Graphics.DrawRectangle(pen, selectionStart.X, selectionStart.Y, mousePos.X - selectionStart.X, mousePos.Y - selectionStart.Y);
+                    e.Graphics.DrawRectangle(pen, Math.Min(selectionStart.X, mousePos.X), Math.Min(selectionStart.Y, mousePos.Y), Math.Abs(mousePos.X - selectionStart.X), Math.Abs(mousePos.Y - selectionStart.Y));
                 }
                 else
                 {
@@ -89,12 +89,14 @@ namespace ShittyInpainter
             if (image == null) return;
 
             isSelecting = false;
-            selectionEnd = mousePos;
 
-            selectionStart.X = Math.Clamp(selectionStart.X, 0, pictureBox1.Width - 1);
-            selectionStart.Y = Math.Clamp(selectionStart.Y, 0, pictureBox1.Height - 1);
-            selectionEnd.X = Math.Clamp(selectionEnd.X, 0, pictureBox1.Width - 1);
-            selectionEnd.Y = Math.Clamp(selectionEnd.Y, 0, pictureBox1.Height - 1);
+            int left = Math.Min(selectionStart.X, mousePos.X);
+            int top = Math.Min(selectionStart.Y, mousePos.Y);
+            int right = Math.Max(selectionStart.X, mousePos.X);
+            int bottom = Math.Max(selectionStart.Y, mousePos.Y);
+
+            selectionStart = new Point(left, top);
+            selectionEnd = new Point(right, bottom);
         }
 
         private void btnSave_Click(object sender, EventArgs e)
