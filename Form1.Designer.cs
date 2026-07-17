@@ -206,6 +206,7 @@
             MaximizeBox = false;
             MinimumSize = new Size(750, 550);
             Name = "Form1";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "ShittyInpainter";
             KeyDown += Form1_KeyDown;
             tableLayoutPanel1.ResumeLayout(false);
