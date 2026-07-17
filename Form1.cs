@@ -65,27 +65,30 @@ namespace ShittyInpainter
                     double urDist = Math.Sqrt(Math.Pow(mousePos.X - upperRight.X, 2) + Math.Pow(mousePos.Y - upperRight.Y, 2));
                     double llDist = Math.Sqrt(Math.Pow(mousePos.X - lowerLeft.X, 2) + Math.Pow(mousePos.Y - lowerLeft.Y, 2));
                     double lrDist = Math.Sqrt(Math.Pow(mousePos.X - lowerRight.X, 2) + Math.Pow(mousePos.Y - lowerRight.Y, 2));
-                    string minName = "ul";
-                    double minNum = ulDist;
-                    if (urDist < ulDist) { minName = "ur"; minNum = urDist; }
-                    if (llDist < minNum) { minName = "ll"; minNum = llDist; }
-                    if (lrDist < minNum) { minName = "lr"; minNum = lrDist; }
-                    switch (minName)
+                    string minDistName = "ul";
+                    double minDist = ulDist;
+                    if (urDist < ulDist) { minDistName = "ur"; minDist = urDist; }
+                    if (llDist < minDist) { minDistName = "ll"; minDist = llDist; }
+                    if (lrDist < minDist) { minDistName = "lr"; minDist = lrDist; }
+                    if (minDist <= 30)
                     {
-                        case "ul":
-                            selectionStart = mousePos;
-                            break;
-                        case "ur":
-                            selectionStart.Y = mousePos.Y;
-                            selectionEnd.X = mousePos.X;
-                            break;
-                        case "ll":
-                            selectionStart.X = mousePos.X;
-                            selectionEnd.Y = mousePos.Y;
-                            break;
-                        case "lr":
-                            selectionEnd = mousePos;
-                            break;
+                        switch (minDistName)
+                        {
+                            case "ul":
+                                selectionStart = mousePos;
+                                break;
+                            case "ur":
+                                selectionStart.Y = mousePos.Y;
+                                selectionEnd.X = mousePos.X;
+                                break;
+                            case "ll":
+                                selectionStart.X = mousePos.X;
+                                selectionEnd.Y = mousePos.Y;
+                                break;
+                            case "lr":
+                                selectionEnd = mousePos;
+                                break;
+                        }
                     }
                 }
             }
