@@ -1,7 +1,15 @@
 namespace ShittyInpainter
 {
+    public enum SelectionMode
+    {
+        Rectangle,
+        Lasso
+    }
+
     public partial class Form1 : Form
     {
+        SelectionMode currentMode = SelectionMode.Rectangle;
+
         Point mousePos = new Point(0, 0);
         Point selectionStart = new Point(0, 0);
         Point selectionEnd = new Point(0, 0);
@@ -435,6 +443,16 @@ namespace ShittyInpainter
                 e.SuppressKeyPress = true;
                 SaveImage();
             }
+        }
+
+        private void rbRectMode_Click(object sender, EventArgs e)
+        {
+            currentMode = SelectionMode.Rectangle;
+        }
+
+        private void rbLassoMode_Click(object sender, EventArgs e)
+        {
+            currentMode = SelectionMode.Lasso;
         }
     }
 }

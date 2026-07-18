@@ -154,6 +154,7 @@
             rbRectMode.TabStop = true;
             rbRectMode.Text = "Rectangle";
             rbRectMode.UseVisualStyleBackColor = true;
+            rbRectMode.Click += rbRectMode_Click;
             // 
             // rbLassoMode
             // 
@@ -165,6 +166,7 @@
             rbLassoMode.TabIndex = 1;
             rbLassoMode.Text = "Lasso";
             rbLassoMode.UseVisualStyleBackColor = true;
+            rbLassoMode.Click += rbLassoMode_Click;
             // 
             // imagePanel
             // 
