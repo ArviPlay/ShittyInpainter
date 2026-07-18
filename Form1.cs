@@ -11,10 +11,10 @@ namespace ShittyInpainter
         SelectionMode currentMode = SelectionMode.Rectangle;
 
         Point mousePos = new Point(0, 0);
-        Point selectionStart = new Point(0, 0);
-        Point selectionEnd = new Point(0, 0);
-        bool isSelecting = false;
-        bool isEditingSelection = false;
+        Point rectSelectionStart = new Point(0, 0);
+        Point rectSelectionEnd = new Point(0, 0);
+        bool rectIsSelecting = false;
+        bool rectIsEditingSelection = false;
         bool isMouseInsidePB = false;
 
         Bitmap image;
@@ -38,9 +38,9 @@ namespace ShittyInpainter
                     if (image != null) previousImage = new Bitmap(image);
                     image = new Bitmap(ofd.FileName);
                     pictureBox1.Image = image;
-                    selectionStart = new Point(0, 0);
-                    selectionEnd = new Point(0, 0);
-                    isSelecting = false;
+                    rectSelectionStart = new Point(0, 0);
+                    rectSelectionEnd = new Point(0, 0);
+                    rectIsSelecting = false;
                     ResizePictureBoxToFitPanel();
                     pictureBox1.Invalidate();
                     pictureBox1.Cursor = Cursors.Cross;
@@ -64,13 +64,13 @@ namespace ShittyInpainter
                 case SelectionMode.Rectangle:
                     if (e.Button == MouseButtons.Right)
                     {
-                        if (selectionStart == selectionEnd) return;
-                        if (isEditingSelection)
+                        if (rectSelectionStart == rectSelectionEnd) return;
+                        if (rectIsEditingSelection)
                         {
-                            Point upperLeft = selectionStart;
-                            Point upperRight = new Point(selectionEnd.X, selectionStart.Y);
-                            Point lowerLeft = new Point(selectionStart.X, selectionEnd.Y);
-                            Point lowerRight = selectionEnd;
+                            Point upperLeft = rectSelectionStart;
+                            Point upperRight = new Point(rectSelectionEnd.X, rectSelectionStart.Y);
+                            Point lowerLeft = new Point(rectSelectionStart.X, rectSelectionEnd.Y);
+                            Point lowerRight = rectSelectionEnd;
                             double ulDist = Math.Sqrt(Math.Pow(mousePos.X - upperLeft.X, 2) + Math.Pow(mousePos.Y - upperLeft.Y, 2));
                             double urDist = Math.Sqrt(Math.Pow(mousePos.X - upperRight.X, 2) + Math.Pow(mousePos.Y - upperRight.Y, 2));
                             double llDist = Math.Sqrt(Math.Pow(mousePos.X - lowerLeft.X, 2) + Math.Pow(mousePos.Y - lowerLeft.Y, 2));
@@ -85,18 +85,18 @@ namespace ShittyInpainter
                                 switch (minDistName)
                                 {
                                     case "ul":
-                                        selectionStart = mousePos;
+                                        rectSelectionStart = mousePos;
                                         break;
                                     case "ur":
-                                        selectionStart.Y = mousePos.Y;
-                                        selectionEnd.X = mousePos.X;
+                                        rectSelectionStart.Y = mousePos.Y;
+                                        rectSelectionEnd.X = mousePos.X;
                                         break;
                                     case "ll":
-                                        selectionStart.X = mousePos.X;
-                                        selectionEnd.Y = mousePos.Y;
+                                        rectSelectionStart.X = mousePos.X;
+                                        rectSelectionEnd.Y = mousePos.Y;
                                         break;
                                     case "lr":
-                                        selectionEnd = mousePos;
+                                        rectSelectionEnd = mousePos;
                                         break;
                                 }
                             }
@@ -123,13 +123,13 @@ namespace ShittyInpainter
                 case SelectionMode.Rectangle:
                     using (Pen pen = new Pen(Color.DarkRed))
                     {
-                        if (isSelecting)
+                        if (rectIsSelecting)
                         {
-                            e.Graphics.DrawRectangle(pen, Math.Min(selectionStart.X, mousePos.X), Math.Min(selectionStart.Y, mousePos.Y), Math.Abs(mousePos.X - selectionStart.X), Math.Abs(mousePos.Y - selectionStart.Y));
+                            e.Graphics.DrawRectangle(pen, Math.Min(rectSelectionStart.X, mousePos.X), Math.Min(rectSelectionStart.Y, mousePos.Y), Math.Abs(mousePos.X - rectSelectionStart.X), Math.Abs(mousePos.Y - rectSelectionStart.Y));
                         }
                         else
                         {
-                            e.Graphics.DrawRectangle(pen, selectionStart.X, selectionStart.Y, selectionEnd.X - selectionStart.X, selectionEnd.Y - selectionStart.Y);
+                            e.Graphics.DrawRectangle(pen, rectSelectionStart.X, rectSelectionStart.Y, rectSelectionEnd.X - rectSelectionStart.X, rectSelectionEnd.Y - rectSelectionStart.Y);
                         }
                     }
                     break;
@@ -147,15 +147,15 @@ namespace ShittyInpainter
                 case SelectionMode.Rectangle:
                     if (e.Button == MouseButtons.Left)
                     {
-                        isSelecting = true;
-                        selectionStart = mousePos;
+                        rectIsSelecting = true;
+                        rectSelectionStart = mousePos;
                     }
                     else if (e.Button == MouseButtons.Right)
                     {
-                        if (selectionStart == selectionEnd) return;
+                        if (rectSelectionStart == rectSelectionEnd) return;
                         else
                         {
-                            isEditingSelection = true;
+                            rectIsEditingSelection = true;
                         }
                     }
                     break;
@@ -173,24 +173,24 @@ namespace ShittyInpainter
                 case SelectionMode.Rectangle:
                     if (e.Button == MouseButtons.Left)
                     {
-                        isSelecting = false;
+                        rectIsSelecting = false;
 
-                        int left = Math.Min(selectionStart.X, mousePos.X);
-                        int top = Math.Min(selectionStart.Y, mousePos.Y);
-                        int right = Math.Max(selectionStart.X, mousePos.X);
-                        int bottom = Math.Max(selectionStart.Y, mousePos.Y);
+                        int left = Math.Min(rectSelectionStart.X, mousePos.X);
+                        int top = Math.Min(rectSelectionStart.Y, mousePos.Y);
+                        int right = Math.Max(rectSelectionStart.X, mousePos.X);
+                        int bottom = Math.Max(rectSelectionStart.Y, mousePos.Y);
 
-                        selectionStart = new Point(left, top);
-                        selectionEnd = new Point(right, bottom);
+                        rectSelectionStart = new Point(left, top);
+                        rectSelectionEnd = new Point(right, bottom);
                     }
                     if (e.Button == MouseButtons.Right)
                     {
-                        isEditingSelection = false;
+                        rectIsEditingSelection = false;
                     }
-                    selectionStart.X = Math.Clamp(selectionStart.X, 0, pictureBox1.Width - 1);
-                    selectionStart.Y = Math.Clamp(selectionStart.Y, 0, pictureBox1.Height - 1);
-                    selectionEnd.X = Math.Clamp(selectionEnd.X, 0, pictureBox1.Width - 1);
-                    selectionEnd.Y = Math.Clamp(selectionEnd.Y, 0, pictureBox1.Height - 1);
+                    rectSelectionStart.X = Math.Clamp(rectSelectionStart.X, 0, pictureBox1.Width - 1);
+                    rectSelectionStart.Y = Math.Clamp(rectSelectionStart.Y, 0, pictureBox1.Height - 1);
+                    rectSelectionEnd.X = Math.Clamp(rectSelectionEnd.X, 0, pictureBox1.Width - 1);
+                    rectSelectionEnd.Y = Math.Clamp(rectSelectionEnd.Y, 0, pictureBox1.Height - 1);
                     pictureBox1.Invalidate();
                     break;
             }
@@ -263,9 +263,9 @@ namespace ShittyInpainter
             switch (currentMode)
             {
                 case SelectionMode.Rectangle:
-                    selectionStart = new Point(0, 0);
-                    selectionEnd = new Point(0, 0);
-                    isSelecting = false;
+                    rectSelectionStart = new Point(0, 0);
+                    rectSelectionEnd = new Point(0, 0);
+                    rectIsSelecting = false;
                     break;
                 case SelectionMode.Lasso:
                     break;
@@ -283,10 +283,10 @@ namespace ShittyInpainter
                         else
                         {
                             Rectangle scaledRect = new Rectangle(
-                            (int)(selectionStart.X * image.Width / (float)pictureBox1.Width),
-                            (int)(selectionStart.Y * image.Height / (float)pictureBox1.Height),
-                            (int)((selectionEnd.X - selectionStart.X) * image.Width / (float)pictureBox1.Width),
-                            (int)((selectionEnd.Y - selectionStart.Y) * image.Height / (float)pictureBox1.Height)
+                            (int)(rectSelectionStart.X * image.Width / (float)pictureBox1.Width),
+                            (int)(rectSelectionStart.Y * image.Height / (float)pictureBox1.Height),
+                            (int)((rectSelectionEnd.X - rectSelectionStart.X) * image.Width / (float)pictureBox1.Width),
+                            (int)((rectSelectionEnd.Y - rectSelectionStart.Y) * image.Height / (float)pictureBox1.Height)
                             );
                             if (scaledRect.Width <= 0 || scaledRect.Height <= 0) return;
                             btnLoad.Enabled = false;
