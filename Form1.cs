@@ -17,6 +17,9 @@ namespace ShittyInpainter
         bool rectIsEditingSelection = false;
         bool isMouseInsidePB = false;
 
+        List<Point> lassoSelectionPoints = new List<Point>();
+        bool lassoIsSelecting = false;
+
         Bitmap image;
         Bitmap previousImage;
 
@@ -59,6 +62,7 @@ namespace ShittyInpainter
         {
             mousePos = e.Location;
             pictureBox1.Invalidate();
+            if (image == null) return;
             switch (currentMode)
             {
                 case SelectionMode.Rectangle:
@@ -104,6 +108,13 @@ namespace ShittyInpainter
                     }
                     break;
                 case SelectionMode.Lasso:
+                    if (lassoIsSelecting)
+                    {
+                        if (!lassoSelectionPoints.Contains(mousePos))
+                        {
+                            lassoSelectionPoints.Add(mousePos);
+                        }
+                    }
                     break;
             }
             
@@ -134,6 +145,16 @@ namespace ShittyInpainter
                     }
                     break;
                 case SelectionMode.Lasso:
+                    for(int i = 0; i < lassoSelectionPoints.Count; i++)
+                    {
+                        using (Pen pen = new Pen(Color.Red))
+                        {
+                            if(lassoSelectionPoints.Count >= 2)
+                            {
+                                e.Graphics.DrawLines(pen, lassoSelectionPoints.ToArray());
+                            }
+                        }
+                    }
                     break;
             }
         }
@@ -160,6 +181,12 @@ namespace ShittyInpainter
                     }
                     break;
                 case SelectionMode.Lasso:
+                    if (e.Button == MouseButtons.Left)
+                    {
+                        lassoSelectionPoints.Clear();
+                        lassoIsSelecting = true;
+                        lassoSelectionPoints.Add(mousePos);
+                    }
                     break;
             }
         }
@@ -192,6 +219,14 @@ namespace ShittyInpainter
                     rectSelectionEnd.X = Math.Clamp(rectSelectionEnd.X, 0, pictureBox1.Width - 1);
                     rectSelectionEnd.Y = Math.Clamp(rectSelectionEnd.Y, 0, pictureBox1.Height - 1);
                     pictureBox1.Invalidate();
+                    break;
+                case SelectionMode.Lasso:
+                    if (lassoSelectionPoints.Count == 0) return;
+                    lassoIsSelecting = false;
+                    if (!lassoSelectionPoints.Contains(mousePos))
+                    {
+                        lassoSelectionPoints.Add(mousePos);
+                    }
                     break;
             }
         }
