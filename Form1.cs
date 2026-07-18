@@ -59,47 +59,54 @@ namespace ShittyInpainter
         {
             mousePos = e.Location;
             pictureBox1.Invalidate();
-
-            if (e.Button == MouseButtons.Right)
+            switch (currentMode)
             {
-                if (selectionStart == selectionEnd) return;
-                if (isEditingSelection)
-                {
-                    Point upperLeft = selectionStart;
-                    Point upperRight = new Point(selectionEnd.X, selectionStart.Y);
-                    Point lowerLeft = new Point(selectionStart.X, selectionEnd.Y);
-                    Point lowerRight = selectionEnd;
-                    double ulDist = Math.Sqrt(Math.Pow(mousePos.X - upperLeft.X, 2) + Math.Pow(mousePos.Y - upperLeft.Y, 2));
-                    double urDist = Math.Sqrt(Math.Pow(mousePos.X - upperRight.X, 2) + Math.Pow(mousePos.Y - upperRight.Y, 2));
-                    double llDist = Math.Sqrt(Math.Pow(mousePos.X - lowerLeft.X, 2) + Math.Pow(mousePos.Y - lowerLeft.Y, 2));
-                    double lrDist = Math.Sqrt(Math.Pow(mousePos.X - lowerRight.X, 2) + Math.Pow(mousePos.Y - lowerRight.Y, 2));
-                    string minDistName = "ul";
-                    double minDist = ulDist;
-                    if (urDist < ulDist) { minDistName = "ur"; minDist = urDist; }
-                    if (llDist < minDist) { minDistName = "ll"; minDist = llDist; }
-                    if (lrDist < minDist) { minDistName = "lr"; minDist = lrDist; }
-                    if (minDist <= 20)
+                case SelectionMode.Rectangle:
+                    if (e.Button == MouseButtons.Right)
                     {
-                        switch (minDistName)
+                        if (selectionStart == selectionEnd) return;
+                        if (isEditingSelection)
                         {
-                            case "ul":
-                                selectionStart = mousePos;
-                                break;
-                            case "ur":
-                                selectionStart.Y = mousePos.Y;
-                                selectionEnd.X = mousePos.X;
-                                break;
-                            case "ll":
-                                selectionStart.X = mousePos.X;
-                                selectionEnd.Y = mousePos.Y;
-                                break;
-                            case "lr":
-                                selectionEnd = mousePos;
-                                break;
+                            Point upperLeft = selectionStart;
+                            Point upperRight = new Point(selectionEnd.X, selectionStart.Y);
+                            Point lowerLeft = new Point(selectionStart.X, selectionEnd.Y);
+                            Point lowerRight = selectionEnd;
+                            double ulDist = Math.Sqrt(Math.Pow(mousePos.X - upperLeft.X, 2) + Math.Pow(mousePos.Y - upperLeft.Y, 2));
+                            double urDist = Math.Sqrt(Math.Pow(mousePos.X - upperRight.X, 2) + Math.Pow(mousePos.Y - upperRight.Y, 2));
+                            double llDist = Math.Sqrt(Math.Pow(mousePos.X - lowerLeft.X, 2) + Math.Pow(mousePos.Y - lowerLeft.Y, 2));
+                            double lrDist = Math.Sqrt(Math.Pow(mousePos.X - lowerRight.X, 2) + Math.Pow(mousePos.Y - lowerRight.Y, 2));
+                            string minDistName = "ul";
+                            double minDist = ulDist;
+                            if (urDist < ulDist) { minDistName = "ur"; minDist = urDist; }
+                            if (llDist < minDist) { minDistName = "ll"; minDist = llDist; }
+                            if (lrDist < minDist) { minDistName = "lr"; minDist = lrDist; }
+                            if (minDist <= 20)
+                            {
+                                switch (minDistName)
+                                {
+                                    case "ul":
+                                        selectionStart = mousePos;
+                                        break;
+                                    case "ur":
+                                        selectionStart.Y = mousePos.Y;
+                                        selectionEnd.X = mousePos.X;
+                                        break;
+                                    case "ll":
+                                        selectionStart.X = mousePos.X;
+                                        selectionEnd.Y = mousePos.Y;
+                                        break;
+                                    case "lr":
+                                        selectionEnd = mousePos;
+                                        break;
+                                }
+                            }
                         }
                     }
-                }
+                    break;
+                case SelectionMode.Lasso:
+                    break;
             }
+            
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
@@ -111,16 +118,23 @@ namespace ShittyInpainter
                     e.Graphics.FillEllipse(brush, mousePos.X - 3, mousePos.Y - 3, 6, 6);
                 }
             }
-            using (Pen pen = new Pen(Color.DarkRed))
+            switch (currentMode)
             {
-                if (isSelecting)
-                {
-                    e.Graphics.DrawRectangle(pen, Math.Min(selectionStart.X, mousePos.X), Math.Min(selectionStart.Y, mousePos.Y), Math.Abs(mousePos.X - selectionStart.X), Math.Abs(mousePos.Y - selectionStart.Y));
-                }
-                else
-                {
-                    e.Graphics.DrawRectangle(pen, selectionStart.X, selectionStart.Y, selectionEnd.X - selectionStart.X, selectionEnd.Y - selectionStart.Y);
-                }
+                case SelectionMode.Rectangle:
+                    using (Pen pen = new Pen(Color.DarkRed))
+                    {
+                        if (isSelecting)
+                        {
+                            e.Graphics.DrawRectangle(pen, Math.Min(selectionStart.X, mousePos.X), Math.Min(selectionStart.Y, mousePos.Y), Math.Abs(mousePos.X - selectionStart.X), Math.Abs(mousePos.Y - selectionStart.Y));
+                        }
+                        else
+                        {
+                            e.Graphics.DrawRectangle(pen, selectionStart.X, selectionStart.Y, selectionEnd.X - selectionStart.X, selectionEnd.Y - selectionStart.Y);
+                        }
+                    }
+                    break;
+                case SelectionMode.Lasso:
+                    break;
             }
         }
 
@@ -128,45 +142,58 @@ namespace ShittyInpainter
         {
             if (image == null) return;
 
-            if (e.Button == MouseButtons.Left)
+            switch (currentMode)
             {
-                isSelecting = true;
-                selectionStart = mousePos;
-            }
-            else if (e.Button == MouseButtons.Right)
-            {
-                if (selectionStart == selectionEnd) return;
-                else
-                {
-                    isEditingSelection = true;
-                }
+                case SelectionMode.Rectangle:
+                    if (e.Button == MouseButtons.Left)
+                    {
+                        isSelecting = true;
+                        selectionStart = mousePos;
+                    }
+                    else if (e.Button == MouseButtons.Right)
+                    {
+                        if (selectionStart == selectionEnd) return;
+                        else
+                        {
+                            isEditingSelection = true;
+                        }
+                    }
+                    break;
+                case SelectionMode.Lasso:
+                    break;
             }
         }
 
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
             if (image == null) return;
-            if (e.Button == MouseButtons.Left)
-            {
-                isSelecting = false;
 
-                int left = Math.Min(selectionStart.X, mousePos.X);
-                int top = Math.Min(selectionStart.Y, mousePos.Y);
-                int right = Math.Max(selectionStart.X, mousePos.X);
-                int bottom = Math.Max(selectionStart.Y, mousePos.Y);
-
-                selectionStart = new Point(left, top);
-                selectionEnd = new Point(right, bottom);
-            }
-            if (e.Button == MouseButtons.Right)
+            switch (currentMode)
             {
-                isEditingSelection = false;
+                case SelectionMode.Rectangle:
+                    if (e.Button == MouseButtons.Left)
+                    {
+                        isSelecting = false;
+
+                        int left = Math.Min(selectionStart.X, mousePos.X);
+                        int top = Math.Min(selectionStart.Y, mousePos.Y);
+                        int right = Math.Max(selectionStart.X, mousePos.X);
+                        int bottom = Math.Max(selectionStart.Y, mousePos.Y);
+
+                        selectionStart = new Point(left, top);
+                        selectionEnd = new Point(right, bottom);
+                    }
+                    if (e.Button == MouseButtons.Right)
+                    {
+                        isEditingSelection = false;
+                    }
+                    selectionStart.X = Math.Clamp(selectionStart.X, 0, pictureBox1.Width - 1);
+                    selectionStart.Y = Math.Clamp(selectionStart.Y, 0, pictureBox1.Height - 1);
+                    selectionEnd.X = Math.Clamp(selectionEnd.X, 0, pictureBox1.Width - 1);
+                    selectionEnd.Y = Math.Clamp(selectionEnd.Y, 0, pictureBox1.Height - 1);
+                    pictureBox1.Invalidate();
+                    break;
             }
-            selectionStart.X = Math.Clamp(selectionStart.X, 0, pictureBox1.Width - 1);
-            selectionStart.Y = Math.Clamp(selectionStart.Y, 0, pictureBox1.Height - 1);
-            selectionEnd.X = Math.Clamp(selectionEnd.X, 0, pictureBox1.Width - 1);
-            selectionEnd.Y = Math.Clamp(selectionEnd.Y, 0, pictureBox1.Height - 1);
-            pictureBox1.Invalidate();
         }
 
         private void btnSave_Click(object sender, EventArgs e)
@@ -232,74 +259,90 @@ namespace ShittyInpainter
         private void imagePanel_Resize(object sender, EventArgs e)
         {
             ResizePictureBoxToFitPanel();
-            selectionStart = new Point(0, 0);
-            selectionEnd = new Point(0, 0);
-            isSelecting = false;
+
+            switch (currentMode)
+            {
+                case SelectionMode.Rectangle:
+                    selectionStart = new Point(0, 0);
+                    selectionEnd = new Point(0, 0);
+                    isSelecting = false;
+                    break;
+                case SelectionMode.Lasso:
+                    break;
+            }
         }
 
         private void btnInpaint_Click(object sender, EventArgs e)
         {
-            try
+            switch (currentMode)
             {
-                if (image == null) MessageBox.Show("Select an image", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                else
-                {
-                    Rectangle scaledRect = new Rectangle(
-                    (int)(selectionStart.X * image.Width / (float)pictureBox1.Width),
-                    (int)(selectionStart.Y * image.Height / (float)pictureBox1.Height),
-                    (int)((selectionEnd.X - selectionStart.X) * image.Width / (float)pictureBox1.Width),
-                    (int)((selectionEnd.Y - selectionStart.Y) * image.Height / (float)pictureBox1.Height)
-                    );
-                    if (scaledRect.Width <= 0 || scaledRect.Height <= 0) return;
-                    btnLoad.Enabled = false;
-                    btnInpaint.Enabled = false;
-                    btnSave.Enabled = false;
-                    tbRandomStrength.Enabled = false;
-                    int randomStrength = tbRandomStrength.Value;
-                    Bitmap imageCopy = new Bitmap(image);
-                    previousImage?.Dispose();
-                    previousImage = new Bitmap(image);
-                    this.Text = "ShittyInpainter - working...";
-                    Task.Run(() =>
+                case SelectionMode.Rectangle:
+                    try
                     {
-                        try
+                        if (image == null) MessageBox.Show("Select an image", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        else
                         {
-                            Bitmap img = Inpaint(imageCopy, scaledRect, randomStrength);
-                            Bitmap oldImage = image;
-                            image = img;
+                            Rectangle scaledRect = new Rectangle(
+                            (int)(selectionStart.X * image.Width / (float)pictureBox1.Width),
+                            (int)(selectionStart.Y * image.Height / (float)pictureBox1.Height),
+                            (int)((selectionEnd.X - selectionStart.X) * image.Width / (float)pictureBox1.Width),
+                            (int)((selectionEnd.Y - selectionStart.Y) * image.Height / (float)pictureBox1.Height)
+                            );
+                            if (scaledRect.Width <= 0 || scaledRect.Height <= 0) return;
+                            btnLoad.Enabled = false;
+                            btnInpaint.Enabled = false;
+                            btnSave.Enabled = false;
+                            tbRandomStrength.Enabled = false;
+                            int randomStrength = tbRandomStrength.Value;
+                            Bitmap imageCopy = new Bitmap(image);
+                            previousImage?.Dispose();
+                            previousImage = new Bitmap(image);
+                            this.Text = "ShittyInpainter - working...";
+                            Task.Run(() =>
+                            {
+                                try
+                                {
+                                    Bitmap img = Inpaint(imageCopy, scaledRect, randomStrength);
+                                    Bitmap oldImage = image;
+                                    image = img;
 
-                            imageCopy?.Dispose();
-                            this.Invoke((Action)(() =>
-                            {
-                                pictureBox1.Image = image;
-                                oldImage?.Dispose();
-                                ResizePictureBoxToFitPanel();
-                                btnLoad.Enabled = true;
-                                btnInpaint.Enabled = true;
-                                btnSave.Enabled = true;
-                                tbRandomStrength.Enabled = true;
-                                this.Text = "ShittyInpainter - completed";
-                            }));
+                                    imageCopy?.Dispose();
+                                    this.Invoke((Action)(() =>
+                                    {
+                                        pictureBox1.Image = image;
+                                        oldImage?.Dispose();
+                                        ResizePictureBoxToFitPanel();
+                                        btnLoad.Enabled = true;
+                                        btnInpaint.Enabled = true;
+                                        btnSave.Enabled = true;
+                                        tbRandomStrength.Enabled = true;
+                                        this.Text = "ShittyInpainter - completed";
+                                    }));
+                                }
+                                catch (Exception ex)
+                                {
+                                    this.Invoke((Action)((() =>
+                                    {
+                                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        btnLoad.Enabled = true;
+                                        btnInpaint.Enabled = true;
+                                        btnSave.Enabled = true;
+                                        tbRandomStrength.Enabled = true;
+                                        this.Text = "ShittyInpainter - inpainting error";
+                                    })));
+                                }
+                            });
                         }
-                        catch (Exception ex)
-                        {
-                            this.Invoke((Action)((() =>
-                            {
-                                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                btnLoad.Enabled = true;
-                                btnInpaint.Enabled = true;
-                                btnSave.Enabled = true;
-                                tbRandomStrength.Enabled = true;
-                                this.Text = "ShittyInpainter - inpainting error";
-                            })));
-                        }
-                    });
-                }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    break;
+                case SelectionMode.Lasso:
+                    break;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            
         }
 
         private Bitmap Inpaint(Bitmap img, Rectangle rect, int randomStrength)
