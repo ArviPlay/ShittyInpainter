@@ -33,6 +33,9 @@
             btnLoad = new Button();
             btnInpaint = new Button();
             btnSave = new Button();
+            tableLayoutPanel4 = new TableLayoutPanel();
+            rbRectMode = new RadioButton();
+            rbLassoMode = new RadioButton();
             imagePanel = new Panel();
             pictureBox1 = new PictureBox();
             tableLayoutPanel3 = new TableLayoutPanel();
@@ -42,6 +45,7 @@
             sfd = new SaveFileDialog();
             tableLayoutPanel1.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
+            tableLayoutPanel4.SuspendLayout();
             imagePanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             tableLayoutPanel3.SuspendLayout();
@@ -76,6 +80,7 @@
             tableLayoutPanel2.Controls.Add(btnLoad, 1, 0);
             tableLayoutPanel2.Controls.Add(btnInpaint, 2, 0);
             tableLayoutPanel2.Controls.Add(btnSave, 3, 0);
+            tableLayoutPanel2.Controls.Add(tableLayoutPanel4, 4, 0);
             tableLayoutPanel2.Dock = DockStyle.Fill;
             tableLayoutPanel2.Location = new Point(3, 3);
             tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -120,6 +125,46 @@
             btnSave.Text = "Save";
             btnSave.UseVisualStyleBackColor = true;
             btnSave.Click += btnSave_Click;
+            // 
+            // tableLayoutPanel4
+            // 
+            tableLayoutPanel4.ColumnCount = 1;
+            tableLayoutPanel4.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tableLayoutPanel4.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 20F));
+            tableLayoutPanel4.Controls.Add(rbRectMode, 0, 0);
+            tableLayoutPanel4.Controls.Add(rbLassoMode, 0, 1);
+            tableLayoutPanel4.Dock = DockStyle.Fill;
+            tableLayoutPanel4.Location = new Point(583, 3);
+            tableLayoutPanel4.Name = "tableLayoutPanel4";
+            tableLayoutPanel4.RowCount = 2;
+            tableLayoutPanel4.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tableLayoutPanel4.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tableLayoutPanel4.Size = new Size(142, 56);
+            tableLayoutPanel4.TabIndex = 3;
+            // 
+            // rbRectMode
+            // 
+            rbRectMode.AutoSize = true;
+            rbRectMode.Checked = true;
+            rbRectMode.Dock = DockStyle.Left;
+            rbRectMode.Location = new Point(3, 3);
+            rbRectMode.Name = "rbRectMode";
+            rbRectMode.Size = new Size(77, 22);
+            rbRectMode.TabIndex = 0;
+            rbRectMode.TabStop = true;
+            rbRectMode.Text = "Rectangle";
+            rbRectMode.UseVisualStyleBackColor = true;
+            // 
+            // rbLassoMode
+            // 
+            rbLassoMode.AutoSize = true;
+            rbLassoMode.Dock = DockStyle.Left;
+            rbLassoMode.Location = new Point(3, 31);
+            rbLassoMode.Name = "rbLassoMode";
+            rbLassoMode.Size = new Size(54, 22);
+            rbLassoMode.TabIndex = 1;
+            rbLassoMode.Text = "Lasso";
+            rbLassoMode.UseVisualStyleBackColor = true;
             // 
             // imagePanel
             // 
@@ -211,6 +256,8 @@
             KeyDown += Form1_KeyDown;
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel2.ResumeLayout(false);
+            tableLayoutPanel4.ResumeLayout(false);
+            tableLayoutPanel4.PerformLayout();
             imagePanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             tableLayoutPanel3.ResumeLayout(false);
@@ -233,5 +280,8 @@
         private TableLayoutPanel tableLayoutPanel3;
         private TrackBar tbRandomStrength;
         private Label lblRandomStrength;
+        private TableLayoutPanel tableLayoutPanel4;
+        private RadioButton rbRectMode;
+        private RadioButton rbLassoMode;
     }
 }

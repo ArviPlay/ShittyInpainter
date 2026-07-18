@@ -51,7 +51,7 @@ namespace ShittyInpainter
         {
             mousePos = e.Location;
             pictureBox1.Invalidate();
-            
+
             if (e.Button == MouseButtons.Right)
             {
                 if (selectionStart == selectionEnd) return;
@@ -259,7 +259,7 @@ namespace ShittyInpainter
                             Bitmap img = Inpaint(imageCopy, scaledRect, randomStrength);
                             Bitmap oldImage = image;
                             image = img;
-                            
+
                             imageCopy?.Dispose();
                             this.Invoke((Action)(() =>
                             {
