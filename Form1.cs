@@ -234,6 +234,11 @@ namespace ShittyInpainter
                             lassoSelectionPoints.Add(current);
                         }
 
+                        for (int i = 0; i < lassoSelectionPoints.Count; i++)
+                        {
+                            lassoSelectionPoints[i] = new Point(Math.Clamp(lassoSelectionPoints[i].X, 0, pictureBox1.Width - 1), Math.Clamp(lassoSelectionPoints[i].Y, 0, pictureBox1.Height - 1));
+                        }
+
                         pictureBox1.Invalidate();
                     }
                     break;
