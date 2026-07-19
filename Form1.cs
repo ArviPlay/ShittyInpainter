@@ -556,7 +556,113 @@ namespace ShittyInpainter
 
         private Bitmap InpaintLasso(Bitmap img, Point[] selection, int randomStrength)
         {
-            return img;
+            Random rnd = new Random();
+
+            this.BeginInvoke((Action)(() =>
+            {
+                this.Text = $"ShittyInpainter - converting to array";
+            }));
+            Color[,] imgArr = ImageHelper.BitmapToArray(img);
+            Color[,] resultArr = (Color[,])imgArr.Clone();
+
+            if (selection == null || selection.Length < 3) return img;
+
+            int minX = selection[0].X;
+            int maxX = selection[0].X;
+            int minY = selection[0].Y;
+            int maxY = selection[0].Y;
+            for (int i = 1; i < selection.Length; i++)
+            {
+                if (selection[i].X < minX) minX = selection[i].X;
+                if (selection[i].X > maxX) maxX = selection[i].X;
+                if (selection[i].Y < minY) minY = selection[i].Y;
+                if (selection[i].Y > maxY) maxY = selection[i].Y;
+            }
+            minX = Math.Max(0, minX);
+            maxX = Math.Min(imgArr.GetLength(0) - 1, maxX);
+            minY = Math.Max(0, minY);
+            maxY = Math.Min(imgArr.GetLength(1) - 1, maxY);
+
+            int totalPixels = (maxX - minX + 1) * (maxY - minY + 1);
+            int processedPixels = 0;
+
+            for (int y = minY; y <= maxY; y++)
+            {
+                for (int x = minX; x <= maxX; x++)
+                {
+                    if (IsPointInPolygon(new Point(x,y), selection))
+                    {
+                        Color leftColor = Color.Black;
+                        for (int lx = x; lx >= 0; lx--)
+                        {
+                            if (!IsPointInPolygon(new Point(lx,y), selection))
+                            {
+                                leftColor = imgArr[lx, y];
+                                break;
+                            }
+                        }
+
+                        Color rightColor = Color.Black;
+                        for (int rx = x; rx < imgArr.GetLength(0); rx++)
+                        {
+                            if (!IsPointInPolygon(new Point(rx, y), selection))
+                            {
+                                rightColor = imgArr[rx, y];
+                                break;
+                            }
+                        }
+
+                        Color upColor = Color.Black;
+                        for (int uy = y; uy >= 0; uy--)
+                        {
+                            if (!IsPointInPolygon(new Point(x, uy), selection))
+                            {
+                                upColor = imgArr[x, uy];
+                                break;
+                            }
+                        }
+
+                        Color downColor = Color.Black;
+                        for (int dy = y; dy < imgArr.GetLength(1); dy++)
+                        {
+                            if (!IsPointInPolygon(new Point(x, dy), selection))
+                            {
+                                downColor = imgArr[x, dy];
+                                break;
+                            }
+                        }
+
+                        int noise = rnd.Next(0, randomStrength) - randomStrength / 2;
+                        Color mixedColor = Color.FromArgb(Math.Clamp((leftColor.R + rightColor.R + upColor.R + downColor.R) / 4 + noise, 0, 255),
+                                                          Math.Clamp((leftColor.G + rightColor.G + upColor.G + downColor.G) / 4 + noise, 0, 255),
+                                                          Math.Clamp((leftColor.B + rightColor.B + upColor.B + downColor.B) / 4 + noise, 0, 255));
+                        resultArr[x, y] = mixedColor;
+                    }
+
+                    processedPixels++;
+                    if(processedPixels % 100 == 0)
+                    {
+                        this.BeginInvoke((Action)(() =>
+                        {
+                            this.Text = $"ShittyInpainter - inpainting: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
+                        }));
+                    }
+                }
+            }
+
+            this.BeginInvoke((Action)(() =>
+            {
+                this.Text = $"ShittyInpainter - converting to image";
+            }));
+            Bitmap newImg = ImageHelper.ArrayToBitmap(resultArr);
+
+            img = null;
+            imgArr = null;
+            resultArr = null;
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            return newImg;
         }
 
         private void tbRandomStrength_Scroll(object sender, EventArgs e)
