@@ -318,6 +318,19 @@ namespace ShittyInpainter
 
         private void btnInpaint_Click(object sender, EventArgs e)
         {
+            Point[] ScalePointsToImage(Point[] points)
+            {
+                List<Point> newPoints = new List<Point>();
+                for (int i = 0; i < points.Length; i++)
+                {
+                    newPoints.Add(new Point((int)(points[i].X * image.Width / (float)pictureBox1.Width), (int)(points[i].Y * image.Height / (float)pictureBox1.Height)));
+                }
+                return newPoints.ToArray();
+            }
+
+            int randomStrength = tbRandomStrength.Value;
+            Bitmap imageCopy = new Bitmap(image);
+
             switch (currentMode)
             {
                 case SelectionMode.Rectangle:
@@ -337,8 +350,6 @@ namespace ShittyInpainter
                             btnInpaint.Enabled = false;
                             btnSave.Enabled = false;
                             tbRandomStrength.Enabled = false;
-                            int randomStrength = tbRandomStrength.Value;
-                            Bitmap imageCopy = new Bitmap(image);
                             previousImage?.Dispose();
                             previousImage = new Bitmap(image);
                             this.Text = "ShittyInpainter - working...";
@@ -346,7 +357,7 @@ namespace ShittyInpainter
                             {
                                 try
                                 {
-                                    Bitmap img = Inpaint(imageCopy, scaledRect, randomStrength);
+                                    Bitmap img = InpaintRect(imageCopy, scaledRect, randomStrength);
                                     Bitmap oldImage = image;
                                     image = img;
 
@@ -384,12 +395,54 @@ namespace ShittyInpainter
                     }
                     break;
                 case SelectionMode.Lasso:
+                    Point[] scaledLasso = ScalePointsToImage(lassoSelectionPoints.ToArray());
+                    btnLoad.Enabled = false;
+                    btnInpaint.Enabled = false;
+                    btnSave.Enabled = false;
+                    tbRandomStrength.Enabled = false;
+                    previousImage?.Dispose();
+                    previousImage = new Bitmap(image);
+                    this.Text = "ShittyInpainter - working...";
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            Bitmap img = InpaintLasso(imageCopy, scaledLasso, randomStrength);
+                            Bitmap oldImage = image;
+                            image = img;
+
+                            imageCopy?.Dispose();
+                            this.Invoke((Action)(() =>
+                            {
+                                pictureBox1.Image = image;
+                                oldImage?.Dispose();
+                                ResizePictureBoxToFitPanel();
+                                btnLoad.Enabled = true;
+                                btnInpaint.Enabled = true;
+                                btnSave.Enabled = true;
+                                tbRandomStrength.Enabled = true;
+                                this.Text = "ShittyInpainter - completed";
+                            }));
+                        }
+                        catch (Exception ex)
+                        {
+                            this.Invoke((Action)((() =>
+                            {
+                                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                btnLoad.Enabled = true;
+                                btnInpaint.Enabled = true;
+                                btnSave.Enabled = true;
+                                tbRandomStrength.Enabled = true;
+                                this.Text = "ShittyInpainter - inpainting error";
+                            })));
+                        }
+                    });
+
                     break;
             }
-            
         }
 
-        private Bitmap Inpaint(Bitmap img, Rectangle rect, int randomStrength)
+        private Bitmap InpaintRect(Bitmap img, Rectangle rect, int randomStrength)
         {
             Random rnd = new Random();
 
@@ -499,6 +552,11 @@ namespace ShittyInpainter
             GC.WaitForPendingFinalizers();
 
             return newImg;
+        }
+
+        private Bitmap InpaintLasso(Bitmap img, Point[] selection, int randomStrength)
+        {
+            return img;
         }
 
         private void tbRandomStrength_Scroll(object sender, EventArgs e)
