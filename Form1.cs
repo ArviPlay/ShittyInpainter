@@ -317,6 +317,8 @@ namespace ShittyInpainter
                     rectIsSelecting = false;
                     break;
                 case SelectionMode.Lasso:
+                    lassoSelectionPoints = new List<Point>();
+                    lassoIsSelecting = false;
                     break;
             }
         }
