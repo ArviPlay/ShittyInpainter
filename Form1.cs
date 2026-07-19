@@ -218,21 +218,24 @@ namespace ShittyInpainter
                     pictureBox1.Invalidate();
                     break;
                 case SelectionMode.Lasso:
-                    if (lassoSelectionPoints.Count == 0) return;
-                    lassoIsSelecting = false;
-                    lassoSelectionPoints.Add(mousePos);
-
-                    int dx = lassoSelectionPoints[0].X - lassoSelectionPoints.Last().X;
-                    int dy = lassoSelectionPoints[0].Y - lassoSelectionPoints.Last().Y;
-                    int steps = Math.Max(Math.Abs(dx), Math.Abs(dy));
-                    Point startPt = lassoSelectionPoints.Last();
-                    for (int i = 0; i < steps; i++)
+                    if (e.Button == MouseButtons.Left)
                     {
-                        Point current = new Point(startPt.X + (dx * i) / steps, startPt.Y + (dy * i) / steps);
-                        lassoSelectionPoints.Add(current);
-                    }
+                        if (lassoSelectionPoints.Count == 0) return;
+                        lassoIsSelecting = false;
+                        lassoSelectionPoints.Add(mousePos);
 
-                    pictureBox1.Invalidate();
+                        int dx = lassoSelectionPoints[0].X - lassoSelectionPoints.Last().X;
+                        int dy = lassoSelectionPoints[0].Y - lassoSelectionPoints.Last().Y;
+                        int steps = Math.Max(Math.Abs(dx), Math.Abs(dy));
+                        Point startPt = lassoSelectionPoints.Last();
+                        for (int i = 0; i < steps; i++)
+                        {
+                            Point current = new Point(startPt.X + (dx * i) / steps, startPt.Y + (dy * i) / steps);
+                            lassoSelectionPoints.Add(current);
+                        }
+
+                        pictureBox1.Invalidate();
+                    }
                     break;
             }
         }
@@ -537,6 +540,22 @@ namespace ShittyInpainter
         private void rbLassoMode_Click(object sender, EventArgs e)
         {
             currentMode = SelectionMode.Lasso;
+        }
+
+        private bool IsPointInPolygon(Point pnt, Point[] polygon)
+        {
+            if (polygon == null || polygon.Length < 3) return false;
+            bool inside = false;
+            int count = polygon.Length;
+            for (int i = 0, j = count - 1; i < count; j = i++)
+            {
+                if (((polygon[i].Y > pnt.Y) != (polygon[j].Y > pnt.Y)) &&
+                    (pnt.X < (polygon[j].X - polygon[i].X) * (pnt.Y - polygon[i].Y) / (polygon[j].Y - polygon[i].Y) + polygon[i].X))
+                {
+                    inside = !inside;
+                }
+            }
+            return inside;
         }
     }
 }
