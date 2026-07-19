@@ -145,14 +145,11 @@ namespace ShittyInpainter
                     }
                     break;
                 case SelectionMode.Lasso:
-                    for(int i = 0; i < lassoSelectionPoints.Count; i++)
+                    using (Pen pen = new Pen(Color.Red))
                     {
-                        using (Pen pen = new Pen(Color.Red))
+                        if(lassoSelectionPoints.Count >= 2)
                         {
-                            if(lassoSelectionPoints.Count >= 2)
-                            {
-                                e.Graphics.DrawLines(pen, lassoSelectionPoints.ToArray());
-                            }
+                            e.Graphics.DrawLines(pen, lassoSelectionPoints.ToArray());
                         }
                     }
                     break;
@@ -223,10 +220,19 @@ namespace ShittyInpainter
                 case SelectionMode.Lasso:
                     if (lassoSelectionPoints.Count == 0) return;
                     lassoIsSelecting = false;
-                    if (!lassoSelectionPoints.Contains(mousePos))
+                    lassoSelectionPoints.Add(mousePos);
+
+                    int dx = lassoSelectionPoints[0].X - lassoSelectionPoints.Last().X;
+                    int dy = lassoSelectionPoints[0].Y - lassoSelectionPoints.Last().Y;
+                    int steps = Math.Max(Math.Abs(dx), Math.Abs(dy));
+                    Point startPt = lassoSelectionPoints.Last();
+                    for (int i = 0; i < steps; i++)
                     {
-                        lassoSelectionPoints.Add(mousePos);
+                        Point current = new Point(startPt.X + (dx * i) / steps, startPt.Y + (dy * i) / steps);
+                        lassoSelectionPoints.Add(current);
                     }
+
+                    pictureBox1.Invalidate();
                     break;
             }
         }
