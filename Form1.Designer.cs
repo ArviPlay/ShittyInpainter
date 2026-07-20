@@ -218,7 +218,6 @@
             tbRandomStrength.Name = "tbRandomStrength";
             tbRandomStrength.Size = new Size(515, 35);
             tbRandomStrength.TabIndex = 0;
-            tbRandomStrength.Value = 150;
             tbRandomStrength.Scroll += tbRandomStrength_Scroll;
             // 
             // lblRandomStrength
@@ -230,7 +229,7 @@
             lblRandomStrength.Name = "lblRandomStrength";
             lblRandomStrength.Size = new Size(201, 41);
             lblRandomStrength.TabIndex = 1;
-            lblRandomStrength.Text = "Random strength: 150";
+            lblRandomStrength.Text = "Random strength: 0";
             lblRandomStrength.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // ofd
