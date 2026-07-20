@@ -7,7 +7,7 @@ a simple experimental image inpainting tool with a custom random algorithm built
 
 ## how it works
 - load an image
-- select a rect area on the image
+- select rect or lasso area on the image
 - adjust the randomness strength using the slider
 - click Inpaint to fill the selected area with a randomized pattern based on the image edges
 - save the result as .png or .jpeg
@@ -17,9 +17,13 @@ a simple experimental image inpainting tool with a custom random algorithm built
 - Inpaint - apply the algorithm to the selected area
 - Save - save the modified image
 - Slider - controls how much randomness is added to the filling
+- Rectangle - rectangle selection mode
+- Lasso (beta) - lasso selection mode
 
 ## hotkeys
 Ctrl+Z - undo last change
+Ctrl+O - load an image
+Ctrl+S - save the image
 
 ## algorithm
 the program fills the selected area by taking colors from the edges of the selection and spreading them inward with random variations
