@@ -21,9 +21,9 @@ a simple experimental image inpainting tool with a custom random algorithm built
 - Lasso (beta) - lasso selection mode
 
 ## hotkeys
-Ctrl+Z - undo last change
-Ctrl+O - load an image
-Ctrl+S - save the image
+- Ctrl+Z - undo last change
+- Ctrl+O - load an image
+- Ctrl+S - save the image
 
 ## algorithm
 the program fills the selected area by taking colors from the edges of the selection and spreading them inward with random variations
