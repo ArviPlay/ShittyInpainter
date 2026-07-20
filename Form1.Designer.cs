@@ -162,9 +162,9 @@
             rbLassoMode.Dock = DockStyle.Left;
             rbLassoMode.Location = new Point(3, 31);
             rbLassoMode.Name = "rbLassoMode";
-            rbLassoMode.Size = new Size(54, 22);
+            rbLassoMode.Size = new Size(88, 22);
             rbLassoMode.TabIndex = 1;
-            rbLassoMode.Text = "Lasso";
+            rbLassoMode.Text = "Lasso (beta)";
             rbLassoMode.UseVisualStyleBackColor = true;
             rbLassoMode.Click += rbLassoMode_Click;
             // 
