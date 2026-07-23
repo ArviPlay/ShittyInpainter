@@ -8,6 +8,8 @@ namespace ShittyInpainter
 
     public partial class Form1 : Form
     {
+        InpainterEngine engine;
+
         SelectionMode currentMode = SelectionMode.Rectangle;
 
         Point mousePos = new Point(0, 0);
@@ -20,7 +22,6 @@ namespace ShittyInpainter
         List<Point> lassoSelectionPoints = new List<Point>();
         bool lassoIsSelecting = false;
 
-        Bitmap image;
         Bitmap previousImage;
 
         public Form1()
@@ -38,9 +39,9 @@ namespace ShittyInpainter
             {
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
-                    if (image != null) previousImage = new Bitmap(image);
-                    image = new Bitmap(ofd.FileName);
-                    pictureBox1.Image = image;
+                    engine = new InpainterEngine(new Bitmap(ofd.FileName), ProgressChanged);
+                    if (!engine.HasImage()) previousImage = new Bitmap(engine.GetImage());
+                    pictureBox1.Image = engine.GetImage();
                     rectSelectionStart = new Point(0, 0);
                     rectSelectionEnd = new Point(0, 0);
                     rectIsSelecting = false;
@@ -49,6 +50,8 @@ namespace ShittyInpainter
                     pictureBox1.Cursor = Cursors.Cross;
                     tbRandomStrength.Enabled = true;
                     this.Text = $"ShittyInpainter - loaded: {ofd.FileName}";
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
                 }
             }
             catch (Exception ex)
@@ -62,7 +65,7 @@ namespace ShittyInpainter
         {
             mousePos = e.Location;
             pictureBox1.Invalidate();
-            if (image == null) return;
+            if (engine == null || !engine.HasImage()) return;
             switch (currentMode)
             {
                 case SelectionMode.Rectangle:
@@ -158,7 +161,7 @@ namespace ShittyInpainter
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            if (image == null) return;
+            if (engine == null || !engine.HasImage()) return;
 
             switch (currentMode)
             {
@@ -190,7 +193,7 @@ namespace ShittyInpainter
 
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
-            if (image == null) return;
+            if (engine == null || !engine.HasImage()) return;
 
             switch (currentMode)
             {
@@ -283,10 +286,10 @@ namespace ShittyInpainter
 
         private void ResizePictureBoxToFitPanel()
         {
-            if (image == null) return;
+            if (engine == null || !engine.HasImage()) return;
 
             float panelAspect = imagePanel.Width / (float)imagePanel.Height;
-            float imageAspect = image.Width / (float)image.Height;
+            float imageAspect = engine.GetImage().Width / (float)engine.GetImage().Height;
             int newWidth, newHeight;
 
             if (imageAspect > panelAspect)
@@ -330,27 +333,26 @@ namespace ShittyInpainter
                 List<Point> newPoints = new List<Point>();
                 for (int i = 0; i < points.Length; i++)
                 {
-                    newPoints.Add(new Point((int)(points[i].X * image.Width / (float)pictureBox1.Width), (int)(points[i].Y * image.Height / (float)pictureBox1.Height)));
+                    newPoints.Add(new Point((int)(points[i].X * engine.GetImage().Width / (float)pictureBox1.Width), (int)(points[i].Y * engine.GetImage().Height / (float)pictureBox1.Height)));
                 }
                 return newPoints.ToArray();
             }
 
             int randomStrength = tbRandomStrength.Value;
-            Bitmap imageCopy = new Bitmap(image);
 
             switch (currentMode)
             {
                 case SelectionMode.Rectangle:
                     try
                     {
-                        if (image == null) MessageBox.Show("Select an image", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        if (engine == null || !engine.HasImage()) MessageBox.Show("Select an image", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         else
                         {
                             Rectangle scaledRect = new Rectangle(
-                            (int)(rectSelectionStart.X * image.Width / (float)pictureBox1.Width),
-                            (int)(rectSelectionStart.Y * image.Height / (float)pictureBox1.Height),
-                            (int)((rectSelectionEnd.X - rectSelectionStart.X) * image.Width / (float)pictureBox1.Width),
-                            (int)((rectSelectionEnd.Y - rectSelectionStart.Y) * image.Height / (float)pictureBox1.Height)
+                            (int)(rectSelectionStart.X * engine.GetImage().Width / (float)pictureBox1.Width),
+                            (int)(rectSelectionStart.Y * engine.GetImage().Height / (float)pictureBox1.Height),
+                            (int)((rectSelectionEnd.X - rectSelectionStart.X) * engine.GetImage().Width / (float)pictureBox1.Width),
+                            (int)((rectSelectionEnd.Y - rectSelectionStart.Y) * engine.GetImage().Height / (float)pictureBox1.Height)
                             );
                             if (scaledRect.Width <= 0 || scaledRect.Height <= 0) return;
                             btnLoad.Enabled = false;
@@ -358,21 +360,16 @@ namespace ShittyInpainter
                             btnSave.Enabled = false;
                             tbRandomStrength.Enabled = false;
                             previousImage?.Dispose();
-                            previousImage = new Bitmap(image);
+                            previousImage = new Bitmap(engine.GetImage());
                             this.Text = "ShittyInpainter - working...";
                             Task.Run(() =>
                             {
                                 try
                                 {
-                                    Bitmap img = InpaintRect(imageCopy, scaledRect, randomStrength);
-                                    Bitmap oldImage = image;
-                                    image = img;
-
-                                    imageCopy?.Dispose();
+                                    engine.InpaintRect(scaledRect, randomStrength);
                                     this.Invoke((Action)(() =>
                                     {
-                                        pictureBox1.Image = image;
-                                        oldImage?.Dispose();
+                                        pictureBox1.Image = engine.GetImage();
                                         ResizePictureBoxToFitPanel();
                                         btnLoad.Enabled = true;
                                         btnInpaint.Enabled = true;
@@ -408,21 +405,17 @@ namespace ShittyInpainter
                     btnSave.Enabled = false;
                     tbRandomStrength.Enabled = false;
                     previousImage?.Dispose();
-                    previousImage = new Bitmap(image);
+                    previousImage = new Bitmap(engine.GetImage());
                     this.Text = "ShittyInpainter - working...";
                     Task.Run(() =>
                     {
                         try
                         {
-                            Bitmap img = InpaintLasso(imageCopy, scaledLasso, randomStrength);
-                            Bitmap oldImage = image;
-                            image = img;
+                            engine.InpaintLasso(scaledLasso, randomStrength);
 
-                            imageCopy?.Dispose();
                             this.Invoke((Action)(() =>
                             {
-                                pictureBox1.Image = image;
-                                oldImage?.Dispose();
+                                pictureBox1.Image = engine.GetImage();
                                 ResizePictureBoxToFitPanel();
                                 btnLoad.Enabled = true;
                                 btnInpaint.Enabled = true;
@@ -449,229 +442,6 @@ namespace ShittyInpainter
             }
         }
 
-        private Bitmap InpaintRect(Bitmap img, Rectangle rect, int randomStrength)
-        {
-            Random rnd = new Random();
-
-            this.BeginInvoke((Action)(() =>
-            {
-                this.Text = $"ShittyInpainter - converting to array";
-            }));
-            Color[,] imgArr = ImageHelper.BitmapToArray(img);
-
-            int totalPixels = rect.Width * rect.Height * 4;
-            int processedPixels = 0;
-
-            if (rect.Width <= 0 || rect.Height <= 0) return img;
-            for (int y = rect.Top; y < rect.Bottom; y++) // left to right
-            {
-                Color leftColor = rect.Left - 1 >= 0 ? imgArr[rect.Left - 1, y] : imgArr[rect.Left, y];
-                for (int x = rect.Left; x < rect.Right; x++)
-                {
-                    Color newColor = Color.FromArgb(Math.Clamp((leftColor.R + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
-                                                Math.Clamp((leftColor.G + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
-                                                Math.Clamp((leftColor.B + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255));
-                    imgArr[x, y] = newColor;
-                    processedPixels++;
-                    if (processedPixels % 50000 == 0)
-                    {
-                        this.BeginInvoke((Action)(() =>
-                        {
-                            this.Text = $"ShittyInpainter - inpainting: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
-                        }));
-                    }
-                }
-            }
-            for (int y = rect.Top; y < rect.Bottom; y++) // right to left
-            {
-                Color rightColor = rect.Right + 1 < imgArr.GetLength(0) ? imgArr[rect.Right + 1, y] : imgArr[rect.Right, y];
-                for (int x = rect.Right; x > rect.Left; x--)
-                {
-                    Color newColor = Color.FromArgb(Math.Clamp((rightColor.R + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
-                                                Math.Clamp((rightColor.G + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
-                                                Math.Clamp((rightColor.B + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255));
-                    Color mixedColor = Color.FromArgb((imgArr[x, y].R + newColor.R) / 2,
-                        (imgArr[x, y].G + newColor.G) / 2,
-                        (imgArr[x, y].B + newColor.B) / 2);
-                    imgArr[x, y] = mixedColor;
-                    processedPixels++;
-                    if (processedPixels % 50000 == 0)
-                    {
-                        this.BeginInvoke((Action)(() =>
-                        {
-                            this.Text = $"ShittyInpainter - inpainting: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
-                        }));
-                    }
-                }
-            }
-            for (int x = rect.Left; x < rect.Right; x++) // top to bottom
-            {
-                Color topColor = rect.Top - 1 >= 0 ? imgArr[x, rect.Top - 1] : imgArr[x, rect.Top];
-                for (int y = rect.Top; y < rect.Bottom; y++)
-                {
-                    Color newColor = Color.FromArgb(Math.Clamp((topColor.R + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
-                                                Math.Clamp((topColor.G + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
-                                                Math.Clamp((topColor.B + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255));
-                    Color mixedColor = Color.FromArgb((imgArr[x, y].R + newColor.R) / 2,
-                        (imgArr[x, y].G + newColor.G) / 2,
-                        (imgArr[x, y].B + newColor.B) / 2);
-                    imgArr[x, y] = mixedColor;
-                    processedPixels++;
-                    if (processedPixels % 50000 == 0)
-                    {
-                        this.BeginInvoke((Action)(() =>
-                        {
-                            this.Text = $"ShittyInpainter - inpainting: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
-                        }));
-                    }
-                }
-            }
-            for (int x = rect.Left; x < rect.Right; x++) // bottom to top
-            {
-                Color bottomColor = rect.Bottom + 1 < imgArr.GetLength(1) ? imgArr[x, rect.Bottom + 1] : imgArr[x, rect.Bottom];
-                for (int y = rect.Bottom; y > rect.Top; y--)
-                {
-                    Color newColor = Color.FromArgb(Math.Clamp((bottomColor.R + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
-                                                Math.Clamp((bottomColor.G + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255),
-                                                Math.Clamp((bottomColor.B + rnd.Next(0, randomStrength) - randomStrength / 2), 0, 255));
-                    Color mixedColor = Color.FromArgb((imgArr[x, y].R + newColor.R) / 2,
-                        (imgArr[x, y].G + newColor.G) / 2,
-                        (imgArr[x, y].B + newColor.B) / 2);
-                    imgArr[x, y] = mixedColor;
-                    processedPixels++;
-                    if (processedPixels % 50000 == 0)
-                    {
-                        this.BeginInvoke((Action)(() =>
-                        {
-                            this.Text = $"ShittyInpainter - inpainting: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
-                        }));
-                    }
-                }
-            }
-            this.BeginInvoke((Action)(() =>
-            {
-                this.Text = $"ShittyInpainter - converting to image";
-            }));
-            Bitmap newImg = ImageHelper.ArrayToBitmap(imgArr);
-            img = null;
-            imgArr = null;
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-
-            return newImg;
-        }
-
-        private Bitmap InpaintLasso(Bitmap img, Point[] selection, int randomStrength)
-        {
-            Random rnd = new Random();
-
-            this.BeginInvoke((Action)(() =>
-            {
-                this.Text = $"ShittyInpainter - converting to array";
-            }));
-            Color[,] imgArr = ImageHelper.BitmapToArray(img);
-            Color[,] resultArr = (Color[,])imgArr.Clone();
-
-            if (selection == null || selection.Length < 3) return img;
-
-            int minX = selection[0].X;
-            int maxX = selection[0].X;
-            int minY = selection[0].Y;
-            int maxY = selection[0].Y;
-            for (int i = 1; i < selection.Length; i++)
-            {
-                if (selection[i].X < minX) minX = selection[i].X;
-                if (selection[i].X > maxX) maxX = selection[i].X;
-                if (selection[i].Y < minY) minY = selection[i].Y;
-                if (selection[i].Y > maxY) maxY = selection[i].Y;
-            }
-            minX = Math.Max(0, minX);
-            maxX = Math.Min(imgArr.GetLength(0) - 1, maxX);
-            minY = Math.Max(0, minY);
-            maxY = Math.Min(imgArr.GetLength(1) - 1, maxY);
-
-            int totalPixels = (maxX - minX + 1) * (maxY - minY + 1);
-            int processedPixels = 0;
-
-            for (int y = minY; y <= maxY; y++)
-            {
-                for (int x = minX; x <= maxX; x++)
-                {
-                    if (IsPointInPolygon(new Point(x,y), selection))
-                    {
-                        Color leftColor = Color.Black;
-                        for (int lx = x; lx >= 0; lx--)
-                        {
-                            if (!IsPointInPolygon(new Point(lx,y), selection))
-                            {
-                                leftColor = imgArr[lx, y];
-                                break;
-                            }
-                        }
-
-                        Color rightColor = Color.Black;
-                        for (int rx = x; rx < imgArr.GetLength(0); rx++)
-                        {
-                            if (!IsPointInPolygon(new Point(rx, y), selection))
-                            {
-                                rightColor = imgArr[rx, y];
-                                break;
-                            }
-                        }
-
-                        Color upColor = Color.Black;
-                        for (int uy = y; uy >= 0; uy--)
-                        {
-                            if (!IsPointInPolygon(new Point(x, uy), selection))
-                            {
-                                upColor = imgArr[x, uy];
-                                break;
-                            }
-                        }
-
-                        Color downColor = Color.Black;
-                        for (int dy = y; dy < imgArr.GetLength(1); dy++)
-                        {
-                            if (!IsPointInPolygon(new Point(x, dy), selection))
-                            {
-                                downColor = imgArr[x, dy];
-                                break;
-                            }
-                        }
-
-                        int noise = rnd.Next(0, randomStrength) - randomStrength / 2;
-                        Color mixedColor = Color.FromArgb(Math.Clamp((leftColor.R + rightColor.R + upColor.R + downColor.R) / 4 + noise, 0, 255),
-                                                          Math.Clamp((leftColor.G + rightColor.G + upColor.G + downColor.G) / 4 + noise, 0, 255),
-                                                          Math.Clamp((leftColor.B + rightColor.B + upColor.B + downColor.B) / 4 + noise, 0, 255));
-                        resultArr[x, y] = mixedColor;
-                    }
-
-                    processedPixels++;
-                    if(processedPixels % 100 == 0)
-                    {
-                        this.BeginInvoke((Action)(() =>
-                        {
-                            this.Text = $"ShittyInpainter - inpainting: {Math.Round((float)processedPixels / totalPixels * 100, 2)}%/100%";
-                        }));
-                    }
-                }
-            }
-
-            this.BeginInvoke((Action)(() =>
-            {
-                this.Text = $"ShittyInpainter - converting to image";
-            }));
-            Bitmap newImg = ImageHelper.ArrayToBitmap(resultArr);
-
-            img = null;
-            imgArr = null;
-            resultArr = null;
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-
-            return newImg;
-        }
-
         private void tbRandomStrength_Scroll(object sender, EventArgs e)
         {
             lblRandomStrength.Text = $"Random strength: {tbRandomStrength.Value}";
@@ -682,11 +452,11 @@ namespace ShittyInpainter
             if (e.Control && e.KeyCode == Keys.Z)
             {
                 e.SuppressKeyPress = true;
-                if (previousImage != null)
+                if (previousImage != null && engine != null)
                 {
-                    image = new Bitmap(previousImage);
+                    engine.SetImage(previousImage);
                     previousImage = null;
-                    pictureBox1.Image = image;
+                    pictureBox1.Image = engine.GetImage();
                     pictureBox1.Invalidate();
                     this.Text = $"ShittyInpainter - undo";
                 }
@@ -713,20 +483,20 @@ namespace ShittyInpainter
             currentMode = SelectionMode.Lasso;
         }
 
-        private bool IsPointInPolygon(Point pnt, Point[] polygon)
+        private void ProgressChanged(double progress)
         {
-            if (polygon == null || polygon.Length < 3) return false;
-            bool inside = false;
-            int count = polygon.Length;
-            for (int i = 0, j = count - 1; i < count; j = i++)
+            switch (progress)
             {
-                if (((polygon[i].Y > pnt.Y) != (polygon[j].Y > pnt.Y)) &&
-                    (pnt.X < (polygon[j].X - polygon[i].X) * (pnt.Y - polygon[i].Y) / (polygon[j].Y - polygon[i].Y) + polygon[i].X))
-                {
-                    inside = !inside;
-                }
+                case -2:
+                    this.Text = $"ShittyInpainter - converting to array";
+                    break;
+                case -1:
+                    this.Text = $"ShittyInpainter - converting to image";
+                    break;
+                default:
+                    this.Text = $"ShittyInpainter - inpainting: {progress}%/100%";
+                    break;
             }
-            return inside;
         }
     }
 }
