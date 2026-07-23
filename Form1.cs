@@ -17,7 +17,6 @@ namespace ShittyInpainter
         Point rectSelectionEnd = new Point(0, 0);
         bool rectIsSelecting = false;
         bool rectIsEditingSelection = false;
-        bool isMouseInsidePB = false;
 
         List<Point> lassoSelectionPoints = new List<Point>();
         bool lassoIsSelecting = false;
@@ -29,10 +28,8 @@ namespace ShittyInpainter
             InitializeComponent();
         }
 
-        private void btnLoad_Click(object sender, EventArgs e)
-        {
+        private void btnLoad_Click(object sender, EventArgs e) =>
             LoadImage();
-        }
         private void LoadImage()
         {
             try
@@ -58,6 +55,38 @@ namespace ShittyInpainter
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Text = $"ShittyInpainter - loading error";
+            }
+        }
+
+        private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (engine == null || !engine.HasImage()) return;
+
+            switch (currentMode)
+            {
+                case SelectionMode.Rectangle:
+                    if (e.Button == MouseButtons.Left)
+                    {
+                        rectIsSelecting = true;
+                        rectSelectionStart = mousePos;
+                    }
+                    else if (e.Button == MouseButtons.Right)
+                    {
+                        if (rectSelectionStart == rectSelectionEnd) return;
+                        else
+                        {
+                            rectIsEditingSelection = true;
+                        }
+                    }
+                    break;
+                case SelectionMode.Lasso:
+                    if (e.Button == MouseButtons.Left)
+                    {
+                        lassoSelectionPoints.Clear();
+                        lassoIsSelecting = true;
+                        lassoSelectionPoints.Add(mousePos);
+                    }
+                    break;
             }
         }
 
@@ -114,78 +143,7 @@ namespace ShittyInpainter
                     if (lassoIsSelecting)
                     {
                         if (!lassoSelectionPoints.Contains(mousePos))
-                        {
                             lassoSelectionPoints.Add(mousePos);
-                        }
-                    }
-                    break;
-            }
-            
-        }
-
-        private void pictureBox1_Paint(object sender, PaintEventArgs e)
-        {
-            if (isMouseInsidePB)
-            {
-                using (Brush brush = new SolidBrush(Color.Red))
-                {
-                    e.Graphics.FillEllipse(brush, mousePos.X - 3, mousePos.Y - 3, 6, 6);
-                }
-            }
-            switch (currentMode)
-            {
-                case SelectionMode.Rectangle:
-                    using (Pen pen = new Pen(Color.DarkRed))
-                    {
-                        if (rectIsSelecting)
-                        {
-                            e.Graphics.DrawRectangle(pen, Math.Min(rectSelectionStart.X, mousePos.X), Math.Min(rectSelectionStart.Y, mousePos.Y), Math.Abs(mousePos.X - rectSelectionStart.X), Math.Abs(mousePos.Y - rectSelectionStart.Y));
-                        }
-                        else
-                        {
-                            e.Graphics.DrawRectangle(pen, rectSelectionStart.X, rectSelectionStart.Y, rectSelectionEnd.X - rectSelectionStart.X, rectSelectionEnd.Y - rectSelectionStart.Y);
-                        }
-                    }
-                    break;
-                case SelectionMode.Lasso:
-                    using (Pen pen = new Pen(Color.Red))
-                    {
-                        if(lassoSelectionPoints.Count >= 2)
-                        {
-                            e.Graphics.DrawLines(pen, lassoSelectionPoints.ToArray());
-                        }
-                    }
-                    break;
-            }
-        }
-
-        private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (engine == null || !engine.HasImage()) return;
-
-            switch (currentMode)
-            {
-                case SelectionMode.Rectangle:
-                    if (e.Button == MouseButtons.Left)
-                    {
-                        rectIsSelecting = true;
-                        rectSelectionStart = mousePos;
-                    }
-                    else if (e.Button == MouseButtons.Right)
-                    {
-                        if (rectSelectionStart == rectSelectionEnd) return;
-                        else
-                        {
-                            rectIsEditingSelection = true;
-                        }
-                    }
-                    break;
-                case SelectionMode.Lasso:
-                    if (e.Button == MouseButtons.Left)
-                    {
-                        lassoSelectionPoints.Clear();
-                        lassoIsSelecting = true;
-                        lassoSelectionPoints.Add(mousePos);
                     }
                     break;
             }
@@ -248,10 +206,31 @@ namespace ShittyInpainter
             }
         }
 
-        private void btnSave_Click(object sender, EventArgs e)
+        private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
-            SaveImage();
+            switch (currentMode)
+            {
+                case SelectionMode.Rectangle:
+                    using (Pen pen = new Pen(Color.DarkRed))
+                    {
+                        if (rectIsSelecting)
+                            e.Graphics.DrawRectangle(pen, Math.Min(rectSelectionStart.X, mousePos.X), Math.Min(rectSelectionStart.Y, mousePos.Y), Math.Abs(mousePos.X - rectSelectionStart.X), Math.Abs(mousePos.Y - rectSelectionStart.Y));
+                        else
+                            e.Graphics.DrawRectangle(pen, rectSelectionStart.X, rectSelectionStart.Y, rectSelectionEnd.X - rectSelectionStart.X, rectSelectionEnd.Y - rectSelectionStart.Y);
+                    }
+                    break;
+                case SelectionMode.Lasso:
+                    using (Pen pen = new Pen(Color.Red))
+                    {
+                        if(lassoSelectionPoints.Count >= 2)
+                            e.Graphics.DrawLines(pen, lassoSelectionPoints.ToArray());
+                    }
+                    break;
+            }
         }
+
+        private void btnSave_Click(object sender, EventArgs e) =>
+            SaveImage();
         private void SaveImage()
         {
             try
@@ -273,23 +252,12 @@ namespace ShittyInpainter
             }
         }
 
-        private void pictureBox1_MouseEnter(object sender, EventArgs e)
-        {
-            isMouseInsidePB = true;
-        }
-
-        private void pictureBox1_MouseLeave(object sender, EventArgs e)
-        {
-            isMouseInsidePB = false;
-            pictureBox1.Invalidate();
-        }
-
         private void ResizePictureBoxToFitPanel()
         {
             if (engine == null || !engine.HasImage()) return;
 
             float panelAspect = imagePanel.Width / (float)imagePanel.Height;
-            float imageAspect = engine.GetImage().Width / (float)engine.GetImage().Height;
+            float imageAspect = engine.ImageWidth / (float)engine.ImageHeight;
             int newWidth, newHeight;
 
             if (imageAspect > panelAspect)
@@ -332,74 +300,22 @@ namespace ShittyInpainter
             {
                 List<Point> newPoints = new List<Point>();
                 for (int i = 0; i < points.Length; i++)
-                {
                     newPoints.Add(new Point((int)(points[i].X * engine.GetImage().Width / (float)pictureBox1.Width), (int)(points[i].Y * engine.GetImage().Height / (float)pictureBox1.Height)));
-                }
                 return newPoints.ToArray();
             }
+            if (engine == null || !engine.HasImage()) {MessageBox.Show("Select an image", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); return; }
 
             int randomStrength = tbRandomStrength.Value;
-
             switch (currentMode)
             {
                 case SelectionMode.Rectangle:
-                    try
-                    {
-                        if (engine == null || !engine.HasImage()) MessageBox.Show("Select an image", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        else
-                        {
-                            Rectangle scaledRect = new Rectangle(
-                            (int)(rectSelectionStart.X * engine.GetImage().Width / (float)pictureBox1.Width),
-                            (int)(rectSelectionStart.Y * engine.GetImage().Height / (float)pictureBox1.Height),
-                            (int)((rectSelectionEnd.X - rectSelectionStart.X) * engine.GetImage().Width / (float)pictureBox1.Width),
-                            (int)((rectSelectionEnd.Y - rectSelectionStart.Y) * engine.GetImage().Height / (float)pictureBox1.Height)
-                            );
-                            if (scaledRect.Width <= 0 || scaledRect.Height <= 0) return;
-                            btnLoad.Enabled = false;
-                            btnInpaint.Enabled = false;
-                            btnSave.Enabled = false;
-                            tbRandomStrength.Enabled = false;
-                            previousImage?.Dispose();
-                            previousImage = new Bitmap(engine.GetImage());
-                            this.Text = "ShittyInpainter - working...";
-                            Task.Run(() =>
-                            {
-                                try
-                                {
-                                    engine.InpaintRect(scaledRect, randomStrength);
-                                    this.Invoke((Action)(() =>
-                                    {
-                                        pictureBox1.Image = engine.GetImage();
-                                        ResizePictureBoxToFitPanel();
-                                        btnLoad.Enabled = true;
-                                        btnInpaint.Enabled = true;
-                                        btnSave.Enabled = true;
-                                        tbRandomStrength.Enabled = true;
-                                        this.Text = "ShittyInpainter - completed";
-                                    }));
-                                }
-                                catch (Exception ex)
-                                {
-                                    this.Invoke((Action)((() =>
-                                    {
-                                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                        btnLoad.Enabled = true;
-                                        btnInpaint.Enabled = true;
-                                        btnSave.Enabled = true;
-                                        tbRandomStrength.Enabled = true;
-                                        this.Text = "ShittyInpainter - inpainting error";
-                                    })));
-                                }
-                            });
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    break;
-                case SelectionMode.Lasso:
-                    Point[] scaledLasso = ScalePointsToImage(lassoSelectionPoints.ToArray());
+                    Rectangle scaledRect = new Rectangle(
+                    (int)(rectSelectionStart.X * engine.GetImage().Width / (float)pictureBox1.Width),
+                    (int)(rectSelectionStart.Y * engine.GetImage().Height / (float)pictureBox1.Height),
+                    (int)((rectSelectionEnd.X - rectSelectionStart.X) * engine.GetImage().Width / (float)pictureBox1.Width),
+                    (int)((rectSelectionEnd.Y - rectSelectionStart.Y) * engine.GetImage().Height / (float)pictureBox1.Height)
+                    );
+                    if (scaledRect.Width <= 0 || scaledRect.Height <= 0) return;
                     btnLoad.Enabled = false;
                     btnInpaint.Enabled = false;
                     btnSave.Enabled = false;
@@ -411,8 +327,7 @@ namespace ShittyInpainter
                     {
                         try
                         {
-                            engine.InpaintLasso(scaledLasso, randomStrength);
-
+                            engine.InpaintRect(scaledRect, randomStrength);
                             this.Invoke((Action)(() =>
                             {
                                 pictureBox1.Image = engine.GetImage();
@@ -437,21 +352,58 @@ namespace ShittyInpainter
                             })));
                         }
                     });
-
+                    break;
+                case SelectionMode.Lasso:
+                    this.Text = "ShittyInpainter - preparing...";
+                    Point[] scaledLasso = ScalePointsToImage(lassoSelectionPoints.ToArray());
+                    btnLoad.Enabled = false;
+                    btnInpaint.Enabled = false;
+                    btnSave.Enabled = false;
+                    tbRandomStrength.Enabled = false;
+                    previousImage?.Dispose();
+                    previousImage = engine.GetImage();
+                    this.Text = "ShittyInpainter - working...";
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            engine.InpaintLasso(scaledLasso, randomStrength);
+                            this.Invoke((Action)(() =>
+                            {
+                                pictureBox1.Image = engine.GetImage();
+                                ResizePictureBoxToFitPanel();
+                                btnLoad.Enabled = true;
+                                btnInpaint.Enabled = true;
+                                btnSave.Enabled = true;
+                                tbRandomStrength.Enabled = true;
+                                this.Text = "ShittyInpainter - completed";
+                            }));
+                        }
+                        catch (Exception ex)
+                        {
+                            this.Invoke((Action)((() =>
+                            {
+                                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                btnLoad.Enabled = true;
+                                btnInpaint.Enabled = true;
+                                btnSave.Enabled = true;
+                                tbRandomStrength.Enabled = true;
+                                this.Text = "ShittyInpainter - inpainting error";
+                            })));
+                        }
+                    });
                     break;
             }
         }
 
-        private void tbRandomStrength_Scroll(object sender, EventArgs e)
-        {
+        private void tbRandomStrength_Scroll(object sender, EventArgs e) =>
             lblRandomStrength.Text = $"Random strength: {tbRandomStrength.Value}";
-        }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
+            e.SuppressKeyPress = true;
             if (e.Control && e.KeyCode == Keys.Z)
             {
-                e.SuppressKeyPress = true;
                 if (previousImage != null && engine != null)
                 {
                     engine.SetImage(previousImage);
@@ -462,29 +414,21 @@ namespace ShittyInpainter
                 }
             }
             else if (e.Control && e.KeyCode == Keys.O)
-            {
-                e.SuppressKeyPress = true;
                 LoadImage();
-            }
             else if (e.Control && e.KeyCode == Keys.S)
-            {
-                e.SuppressKeyPress = true;
                 SaveImage();
-            }
         }
 
-        private void rbRectMode_Click(object sender, EventArgs e)
-        {
+        private void rbRectMode_Click(object sender, EventArgs e) =>
             currentMode = SelectionMode.Rectangle;
-        }
 
-        private void rbLassoMode_Click(object sender, EventArgs e)
-        {
+        private void rbLassoMode_Click(object sender, EventArgs e) =>
             currentMode = SelectionMode.Lasso;
-        }
 
         private void ProgressChanged(double progress)
         {
+            if (this.InvokeRequired)
+                this.Invoke(new Action(() => ProgressChanged(progress)));
             switch (progress)
             {
                 case -2:

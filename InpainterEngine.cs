@@ -7,6 +7,8 @@
         public event ProgressChangedHandler ProgressChanged;
 
         Bitmap image;
+        public int ImageWidth => image?.Width ?? 0; 
+        public int ImageHeight => image?.Height ?? 0;
 
         public InpainterEngine(Bitmap image, ProgressChangedHandler progressChanged)
         {
@@ -14,24 +16,19 @@
             ProgressChanged += progressChanged;
         }
 
-        public Bitmap GetImage()
-        {
-            return new Bitmap(image);
-        }
+        public Bitmap GetImage() =>
+            new Bitmap(image);
 
-        public void SetImage(Bitmap img)
-        {
+        public void SetImage(Bitmap img) =>
             image = new Bitmap(img);
-        }
 
-        public bool HasImage()
-        {
-            return image != null;
-        }
+        public bool HasImage() =>
+            image != null;
 
         public void InpaintRect(Rectangle rect, int randomStrength)
         {
             if (image == null) return;
+            if (rect.Width <= 0 || rect.Height <= 0) return;
 
             ProgressChanged?.Invoke(-2);
 
@@ -40,7 +37,6 @@
             int totalPixels = rect.Width * rect.Height * 4;
             int processedPixels = 0;
 
-            if (rect.Width <= 0 || rect.Height <= 0) return;
             for (int y = rect.Top; y < rect.Bottom; y++) // left to right
             {
                 Color leftColor = rect.Left - 1 >= 0 ? imgArr[rect.Left - 1, y] : imgArr[rect.Left, y];
